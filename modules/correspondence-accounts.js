@@ -29,8 +29,8 @@ export function getHTML() {
                         <td><span class="status-badge active">Aktiv</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('correspondence-accounts', 'view', 'CORR-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('correspondence-accounts', 'edit', 'CORR-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -62,52 +62,9 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="correspondenceAccountsForm" onsubmit="app.submitModuleForm(event, 'correspondence-accounts', '${action}', '${newId}')">
+            <form id="correspondenceAccountsForm" onsubmit="app.submitForm(event, 'correspondence-accounts', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Əsas Məlumatlar</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Hesab Nömrəsi *</label>
-                                <input type="text" name="accountNumber" class="form-input" value="${data.accountNumber || newId}" required ${isView ? 'readonly' : ''}>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ad *</label>
-                                <input type="text" name="name" class="form-input" value="${data.name || ''}" required ${isView ? 'readonly' : ''}>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Əlaqəli Hesab (Əsas Plan)</label>
-                                <select name="relatedAccount" class="form-input" ${isView ? 'disabled' : ''}>
-                                    <option value="">Seçin...</option>
-                                    <option value="101" ${data.relatedAccount === '101' ? 'selected' : ''}>101 - Kassa</option>
-                                    <option value="223" ${data.relatedAccount === '223' ? 'selected' : ''}>223 - Bank hesabları AZN</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-input" ${isView ? 'disabled' : ''}>
-                                    <option value="active" ${data.status === 'active' ? 'selected' : ''}>Aktiv</option>
-                                    <option value="inactive" ${data.status === 'inactive' ? 'selected' : ''}>Qeyri-aktiv</option>
-                                </select>
-                            </div>
-                            <div class="form-group full-width">
-                                <label class="form-label">Təsvir</label>
-                                <textarea name="description" class="form-textarea" ${isView ? 'readonly' : ''}>${data.description || ''}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    ${!isView ? `
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" onclick="app.navigateTo('correspondence-accounts')">
-                                <i class="fas fa-times"></i> Ləğv et
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${action === 'create' ? 'Yarat' : 'Yadda Saxla'}
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            </form>
-        </div>
-    `;
-}
+                        <div class="
+

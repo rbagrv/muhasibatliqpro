@@ -33,13 +33,69 @@ export function getHTML() {
                         <td><span class="status-badge completed">Hesablanıb</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('depreciation', 'view', 'DEPR-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('depreciation', 'edit', 'DEPR-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="module-section">
+            <h2 class="section-title">Əsas Vəsaitlər Üzərində Köhnəlmə Cədvəli</h2>
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Aktiv Adı</th>
+                            <th>Alış Tarixi</th>
+                            <th>İlkin Dəyər</th>
+                            <th>Qalıq Dəyəri</th>
+                            <th>Faydalı Ömür (il)</th>
+                            <th>Köhnəlmə Metodu</th>
+                            <th>İllik Köhnəlmə</th>
+                            <th>Yığılmış Köhnəlmə</th>
+                            <th>Cari Balans Dəyəri</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ofis Binası</td>
+                            <td>01.01.2022</td>
+                            <td>₼500,000</td>
+                            <td>₼0</td>
+                            <td>50</td>
+                            <td>Düzxəttli</td>
+                            <td>₼10,000</td>
+                            <td>₼20,000</td>
+                            <td>₼480,000</td>
+                        </tr>
+                        <tr>
+                            <td>Nəqliyyat Vasitəsi</td>
+                            <td>15.06.2022</td>
+                            <td>₼45,000</td>
+                            <td>₼5,000</td>
+                            <td>5</td>
+                            <td>Azalan Balans</td>
+                            <td>₼8,000</td>
+                            <td>₼14,000</td>
+                            <td>₼31,000</td>
+                        </tr>
+                        <tr>
+                            <td>Server Dell PowerEdge</td>
+                            <td>10.01.2023</td>
+                            <td>₼25,000</td>
+                            <td>₼1,000</td>
+                            <td>4</td>
+                            <td>Düzxəttli</td>
+                            <td>₼6,000</td>
+                            <td>₼12,000</td>
+                            <td>₼13,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     `;
@@ -66,7 +122,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="depreciationForm" onsubmit="app.submitModuleForm(event, 'depreciation', '${action}', '${newId}')">
+            <form id="depreciationForm" onsubmit="app.submitForm(event, 'depreciation', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Hesablama Detalları</h3>
@@ -127,3 +183,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

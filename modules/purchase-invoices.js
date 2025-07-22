@@ -15,7 +15,7 @@ export function getHTML() {
                         <i class="fas fa-upload"></i>
                         İmport
                     </button>
-                    <button class="btn btn-primary" onclick="app.navigateToForm('purchase-invoices', 'create')">
+                    <button class="btn btn-primary" onclick="app.handleEntityOp('purchase-invoices', 'create')">
                         <i class="fas fa-plus"></i>
                         Yeni Faktura
                     </button>
@@ -80,7 +80,7 @@ export function getHTML() {
                             <td><span class="status-badge paid">Ödənilib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-invoices', 'view', 'PINV-2024-001')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-invoices', 'view', 'PINV-2024-001')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-invoices', 'print', 'PINV-2024-001')">
@@ -97,10 +97,10 @@ export function getHTML() {
                             <td><span class="status-badge pending">Gözləyir</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-invoices', 'view', 'PINV-2024-002')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-invoices', 'view', 'PINV-2024-002')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-invoices', 'edit', 'PINV-2024-002')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-invoices', 'edit', 'PINV-2024-002')">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-invoices', 'pay', 'PINV-2024-002')">

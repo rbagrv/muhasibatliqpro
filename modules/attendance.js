@@ -86,9 +86,9 @@ export function getHTML() {
                             <td><span class="status-badge warning">Gecikib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-comment"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'view', 'ATT-0001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'edit', 'ATT-0001')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'comment', 'ATT-0001')"><i class="fas fa-comment"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -102,9 +102,9 @@ export function getHTML() {
                             <td><span class="status-badge completed">Normal</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-check"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'view', 'ATT-0002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'edit', 'ATT-0002')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'check', 'ATT-0002')"><i class="fas fa-check"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -118,8 +118,8 @@ export function getHTML() {
                             <td><span class="status-badge active">İşdə</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-sign-out-alt"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'view', 'ATT-0003')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'sign-out-alt', 'ATT-0003')"><i class="fas fa-sign-out-alt"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -133,8 +133,8 @@ export function getHTML() {
                             <td><span class="status-badge info">Məzuniyyət</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'view', 'ATT-0004')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('attendance', 'calendar', 'ATT-0004')"><i class="fas fa-calendar"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -185,7 +185,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="attendanceForm" onsubmit="app.submitModuleForm(event, 'attendance', '${action}', '${newId}')">
+            <form id="attendanceForm" onsubmit="app.submitForm(event, 'attendance', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Qeydiyyat Detalları</h3>
@@ -244,3 +244,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

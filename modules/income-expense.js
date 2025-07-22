@@ -31,13 +31,125 @@ export function getHTML() {
                             <td><span class="status-badge completed">Təsdiqlənib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('income-expense', 'view', 'INCEXP-0001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('income-expense', 'edit', 'INCEXP-0001')"><i class="fas fa-edit"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>16.02.2024</td>
+                            <td>Məxaric (İcarə haqqı)</td>
+                            <td>₼1,200.00</td>
+                            <td><span class="status-badge completed">Təsdiqlənib</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('income-expense', 'view', 'INCEXP-0002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('income-expense', 'edit', 'INCEXP-0002')"><i class="fas fa-edit"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>17.02.2024</td>
+                            <td>Mədaxil (Kassa satışı)</td>
+                            <td>₼3,200.00</td>
+                            <td><span class="status-badge completed">Təsdiqlənib</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('income-expense', 'view', 'INCEXP-0003')"><i class="fas fa-eye"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">Gəlir və Xərclərin Təhlil Edilmiş Forması</h2>
+                <div class="data-table-container">
+                    <h3>Aylıq Gəlir Kateqoriyaları</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kateqoriya</th>
+                                <th>Bu Ay (₼)</th>
+                                <th>Keçən Ay (₼)</th>
+                                <th>Dəyişiklik (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Məhsul Satışı</td>
+                                <td>35,000</td>
+                                <td>30,000</td>
+                                <td><span class="stat-change positive">+16.67%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Xidmət Gəlirləri</td>
+                                <td>10,230</td>
+                                <td>9,450</td>
+                                <td><span class="stat-change positive">+8.25%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Digər Gəlirlər</td>
+                                <td>2,500</td>
+                                <td>1,800</td>
+                                <td><span class="stat-change positive">+38.89%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ümumi Gəlir</strong></td>
+                                <td><strong>47,730</strong></td>
+                                <td><strong>41,250</strong></td>
+                                <td><span class="stat-change positive">+15.71%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Aylıq Xərc Kateqoriyaları</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kateqoriya</th>
+                                <th>Bu Ay (₼)</th>
+                                <th>Keçən Ay (₼)</th>
+                                <th>Dəyişiklik (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Əmək Haqqı</td>
+                                <td>15,000</td>
+                                <td>14,500</td>
+                                <td><span class="stat-change negative">+3.45%</span></td>
+                            </tr>
+                            <tr>
+                                <td>İcarə</td>
+                                <td>2,500</td>
+                                <td>2,500</td>
+                                <td><span class="stat-change neutral">0%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Kommunal</td>
+                                <td>800</td>
+                                <td>750</td>
+                                <td><span class="stat-change negative">+6.67%</span></td>
+                            </tr>
+                            <tr>
+                                <td>Marketinq</td>
+                                <td>1,500</td>
+                                <td>1,000</td>
+                                <td><span class="stat-change negative">+50.00%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ümumi Xərc</strong></td>
+                                <td><strong>32,780</strong></td>
+                                <td><strong>30,350</strong></td>
+                                <td><span class="stat-change negative">+8.01%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;
@@ -64,7 +176,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="incomeExpenseForm" onsubmit="app.submitModuleForm(event, 'income-expense', '${action}', '${newId}')">
+            <form id="incomeExpenseForm" onsubmit="app.submitForm(event, 'income-expense', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Əməliyyat Məlumatları</h3>
@@ -137,3 +249,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

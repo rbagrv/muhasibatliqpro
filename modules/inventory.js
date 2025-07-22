@@ -14,7 +14,7 @@ export function getHTML() {
             <div class="page-header">
                 <h1>Stok İdarəetməsi</h1>
                 <p>Anbarlardakı stokların avtomatik və əl ilə idarəsi, stok səviyyələrinin nəzarəti.</p>
-                <button class="btn btn-primary" onclick="app.navigateToForm('inventory', 'create')">
+                <button class="btn btn-primary" onclick="app.handleEntityOp('inventory', 'create')">
                     <i class="fas fa-plus"></i> Yeni Stok Hərəkəti
                 </button>
             </div>
@@ -31,6 +31,20 @@ export function getHTML() {
                     <div class="stat-content">
                         <h3>3</h3>
                         <p>Minimal Limitdə Stok</p>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon"><i class="fas fa-retweet"></i></div>
+                    <div class="stat-content">
+                        <h3>4.5x</h3>
+                        <p>Aylıq Dövriyyə</p>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-content">
+                        <h3>₼18,000</h3>
+                        <p>Satılmış Malların Maya Dəyəri (COGS)</p>
                     </div>
                 </div>
             </div>
@@ -55,12 +69,137 @@ export function getHTML() {
                             <td><span class="status-badge active">Yetərli</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('inventory', 'edit', 'STK-0001')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('inventory', 'edit', 'STK-0001')"><i class="fas fa-edit"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>iPhone 15</td>
+                            <td>Filial Anbar</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td><span class="status-badge warning">Az Stok</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('inventory', 'edit', 'STK-0002')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'edit', 'prod_iphone')"><i class="fas fa-plus"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">Anbar Dəyərləmə Hesabatları</h2>
+                <div class="data-table-container">
+                    <h3>Satılmış Malların Maya Dəyəri (COGS)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Dövr</th>
+                                <th>Başlanğıc İnventar</th>
+                                <th>Alışlar</th>
+                                <th>Son İnventar</th>
+                                <th>COGS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Yanvar 2024</td>
+                                <td>₼100,000</td>
+                                <td>₼50,000</td>
+                                <td>₼70,000</td>
+                                <td>₼80,000</td>
+                            </tr>
+                            <tr>
+                                <td>Fevral 2024</td>
+                                <td>₼70,000</td>
+                                <td>₼40,000</td>
+                                <td>₼62,000</td>
+                                <td>₼48,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Anbar Qalığı və Dövriyyə Hesabatı</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Məhsul</th>
+                                <th>Cari Qalıq (ədəd)</th>
+                                <th>Cari Dəyər</th>
+                                <th>Satış Həcmi (ədəd, son 30 gün)</th>
+                                <th>Dövriyyə Nisbəti (aylıq)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Laptop Dell</td>
+                                <td>14</td>
+                                <td>₼16,800</td>
+                                <td>28</td>
+                                <td>2.0x</td>
+                            </tr>
+                            <tr>
+                                <td>Logitech Mouse</td>
+                                <td>45</td>
+                                <td>₼2,025</td>
+                                <td>90</td>
+                                <td>2.0x</td>
+                            </tr>
+                            <tr>
+                                <td>Samsung Galaxy A54</td>
+                                <td>3</td>
+                                <td>₼1,350</td>
+                                <td>15</td>
+                                <td>5.0x</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Qiymətləndirmə Metodu Analizi (FIFO/Weighted Average)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Məhsul</th>
+                                <th>Metod</th>
+                                <th>Son Qalıq Dəyəri</th>
+                                <th>Satışın Maya Dəyəri</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Laptop Dell</td>
+                                <td>FIFO</td>
+                                <td>₼16,800</td>
+                                <td>₼84,000</td>
+                            </tr>
+                            <tr>
+                                <td>Laptop Dell</td>
+                                <td>Weighted Average</td>
+                                <td>₼17,200</td>
+                                <td>₼83,600</td>
+                            </tr>
+                            <tr>
+                                <td>iPhone 15</td>
+                                <td>FIFO</td>
+                                <td>₼9,250</td>
+                                <td>₼5,550</td>
+                            </tr>
+                            <tr>
+                                <td>iPhone 15</td>
+                                <td>Weighted Average</td>
+                                <td>₼9,000</td>
+                                <td>₼5,800</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;

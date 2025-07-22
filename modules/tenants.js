@@ -55,6 +55,9 @@ export function getHTML() {
                             <th>Ad</th>
                             <th>Domain</th>
                             <th>Plan</th>
+                            <th>Növbəti Ödəniş</th>
+                            <th>Aktivdir?</th>
+                            <th>Xəbərdarlıq?</th>
                             <th>İstifadəçi</th>
                             <th>Status</th>
                             <th>Əməliyyatlar</th>
@@ -65,6 +68,9 @@ export function getHTML() {
                             <td>ABC MMC</td>
                             <td>abc.muhasibatliqpro.az</td>
                             <td><span class="badge badge-success">Professional</span></td>
+                            <td>20.03.2024</td>
+                            <td><i class="fas fa-check-circle text-success"></i> Bəli</td>
+                            <td><i class="fas fa-times-circle text-muted"></i> Xeyr</td>
                             <td>23</td>
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
@@ -78,6 +84,12 @@ export function getHTML() {
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tenants', 'cog', 'TNT-0001')">
                                         <i class="fas fa-cog"></i>
                                     </button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tenants', 'activate', 'TNT-0001')">
+                                        <i class="fas fa-unlock"></i>
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tenants', 'confirm-payment', 'TNT-0001')">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -85,6 +97,9 @@ export function getHTML() {
                             <td>XYZ Holdings</td>
                             <td>xyz.muhasibatliqpro.az</td>
                             <td><span class="badge badge-primary">Enterprise</span></td>
+                            <td>25.04.2024</td>
+                            <td><i class="fas fa-check-circle text-success"></i> Bəli</td>
+                            <td><i class="fas fa-times-circle text-muted"></i> Xeyr</td>
                             <td>67</td>
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
@@ -105,6 +120,9 @@ export function getHTML() {
                             <td>Demo Biznes</td>
                             <td>demo.muhasibatliqpro.az</td>
                             <td><span class="badge badge-warning">Basic</span></td>
+                            <td>01.03.2024</td>
+                            <td><i class="fas fa-times-circle text-danger"></i> Xeyr</td>
+                            <td><i class="fas fa-check-circle text-warning"></i> Bəli</td>
                             <td>5</td>
                             <td><span class="status-badge trial">Trial</span></td>
                             <td>
@@ -116,7 +134,10 @@ export function getHTML() {
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tenants', 'upgrade', 'TNT-0003')">
-                                        <i class="fas fa-upgrade"></i>
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tenants', 'activate', 'TNT-0003')">
+                                        <i class="fas fa-unlock"></i>
                                     </button>
                                 </div>
                             </td>
@@ -136,6 +157,8 @@ export function getFormHTML(action = 'create', data = {}) {
     
     // Generate a placeholder ID for create operations, or use existing for edit/view
     const displayId = action === 'create' ? 'Avtomatik Təyin Ediləcək' : data.id || 'N/A';
+    const isActive = typeof data.isActive === 'boolean' ? data.isActive : true;
+    const warningSent = typeof data.warningSent === 'boolean' ? data.warningSent : false;
 
     return `
         <div class="page-content">
@@ -187,6 +210,30 @@ export function getFormHTML(action = 'create', data = {}) {
                             <div class="form-group full-width">
                                 <label class="form-label">Təsvir</label>
                                 <textarea name="description" class="form-textarea" ${isView ? 'readonly' : ''}>${data.description || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Ödəniş Məlumatları</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Növbəti Ödəniş Tarixi</label>
+                                <input type="date" name="nextBillingDate" class="form-input" value="${data.nextBillingDate || ''}" ${isView ? 'readonly' : ''}>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Xəbərdarlıq Göndərilib</label>
+                                <select name="warningSent" class="form-input" ${isView ? 'disabled' : ''}>
+                                    <option value="false" ${!warningSent ? 'selected' : ''}>Xeyr</option>
+                                    <option value="true" ${warningSent ? 'selected' : ''}>Bəli</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Aktivdir?</label>
+                                <select name="isActive" class="form-input" ${isView ? 'disabled' : ''}>
+                                    <option value="true" ${isActive ? 'selected' : ''}>Bəli</option>
+                                    <option value="false" ${!isActive ? 'selected' : ''}>Xeyr</option>
+                                </select>
                             </div>
                         </div>
                     </div>

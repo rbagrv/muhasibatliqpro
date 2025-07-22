@@ -84,9 +84,9 @@ export function getHTML() {
                             <td><span class="status-badge active">İstehsalatda</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-cog"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'view', 'PRO-2024-001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'edit', 'PRO-2024-001')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'cog', 'PRO-2024-001')"><i class="fas fa-cog"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -99,9 +99,9 @@ export function getHTML() {
                             <td><span class="status-badge pending">Gözləyir</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-play"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'view', 'PRO-2024-002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'edit', 'PRO-2024-002')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'play', 'PRO-2024-002')"><i class="fas fa-play"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -114,9 +114,9 @@ export function getHTML() {
                             <td><span class="status-badge completed">Hazır</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-print"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-archive"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'view', 'PRO-2024-003')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'print', 'PRO-2024-003')"><i class="fas fa-print"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'archive', 'PRO-2024-003')"><i class="fas fa-archive"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -172,7 +172,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="productionOrdersForm" onsubmit="app.submitModuleForm(event, 'production-orders', '${action}', '${newId}')">
+            <form id="productionOrdersForm" onsubmit="app.submitForm(event, 'production-orders', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Sifariş Məlumatları</h3>
@@ -239,3 +239,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

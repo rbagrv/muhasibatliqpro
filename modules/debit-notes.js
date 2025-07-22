@@ -244,7 +244,7 @@ export function getFormHTML(action = 'create', data = {}) {
                 </div>
             </div>
 
-            <form id="debitNoteForm" onsubmit="app.submitModuleForm(event, 'debit-notes', '${action}', '${data.id || ''}')">
+            <form id="debitNoteForm" onsubmit="app.submitForm(event, 'debit-notes', '${action}', '${data.id || ''}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Debit Not Məlumatları</h3>
@@ -325,3 +325,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

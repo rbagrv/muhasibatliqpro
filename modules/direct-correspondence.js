@@ -29,8 +29,8 @@ export function getHTML() {
                         <td><span class="status-badge completed">Tam</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('direct-correspondence', 'view', 'OP-2024-001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('direct-correspondence', 'edit', 'OP-2024-001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -62,7 +62,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="directCorrespondenceForm" onsubmit="app.submitModuleForm(event, 'direct-correspondence', '${action}', '${newId}')">
+            <form id="directCorrespondenceForm" onsubmit="app.submitForm(event, 'direct-correspondence', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Müxabirləşmə Detalları</h3>
@@ -131,3 +131,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

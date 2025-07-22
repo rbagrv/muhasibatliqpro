@@ -71,9 +71,9 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'view', 'CRPT-0001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'edit', 'CRPT-0001')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'download', 'CRPT-0001')"><i class="fas fa-download"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -85,9 +85,48 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'view', 'CRPT-0002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'edit', 'CRPT-0002')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'download', 'CRPT-0002')"><i class="fas fa-download"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Debitor Borcları Üzərində Yaşlandırma</td>
+                            <td>Maliyyə</td>
+                            <td>Aylıq</td>
+                            <td>3 gün əvvəl</td>
+                            <td><span class="status-badge active">Aktiv</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'view', 'CRPT-0003')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'download', 'CRPT-0003')"><i class="fas fa-download"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Xammal Sərfiyyatı Analizi</td>
+                            <td>İstehsalat</td>
+                            <td>Rüblük</td>
+                            <td>Keçən həftə</td>
+                            <td><span class="status-badge active">Aktiv</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'view', 'CRPT-0004')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'download', 'CRPT-0004')"><i class="fas fa-download"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Büdcədən Yayınma Analizi</td>
+                            <td>Büdcə</td>
+                            <td>Aylıq</td>
+                            <td>Bugün</td>
+                            <td><span class="status-badge pending">Hesablanır</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'view', 'CRPT-0005')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('custom-reports', 'edit', 'CRPT-0005')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -119,7 +158,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="customReportsForm" onsubmit="app.submitModuleForm(event, 'custom-reports', '${action}', '${newId}')">
+            <form id="customReportsForm" onsubmit="app.submitForm(event, 'custom-reports', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Hesabat Detalları</h3>
@@ -135,6 +174,9 @@ export function getFormHTML(action = 'create', data = {}) {
                                     <option value="analytical" ${data.type === 'analytical' ? 'selected' : ''}>Analitik</option>
                                     <option value="statistical" ${data.type === 'statistical' ? 'selected' : ''}>Statistik</option>
                                     <option value="financial" ${data.type === 'financial' ? 'selected' : ''}>Maliyyə</option>
+                                    <option value="inventory" ${data.type === 'inventory' ? 'selected' : ''}>Anbar</option>
+                                    <option value="production" ${data.type === 'production' ? 'selected' : ''}>İstehsalat</option>
+                                    <option value="budget" ${data.type === 'budget' ? 'selected' : ''}>Büdcə</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -183,3 +225,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

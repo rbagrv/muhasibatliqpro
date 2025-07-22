@@ -8,7 +8,7 @@ export function getHTML() {
         <div class="page-header">
             <h1>Qovluqlar</h1>
             <p>Sənəd və faylların düzgün təsnifatı və idarəetməsi.</p>
-            <button class="btn btn-primary" onclick="app.navigateToForm('folders', 'create')">
+            <button class="btn btn-primary" onclick="app.handleEntityOp('folders', 'create')">
                 <i class="fas fa-plus"></i> Yeni Qovluq
             </button>
         </div>
@@ -29,8 +29,8 @@ export function getHTML() {
                         <td><span class="badge badge-success">Aktiv</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('folders', 'view', 'FOLDER-0001')"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('folders', 'edit', 'FOLDER-0001')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('folders', 'view', 'FOLDER-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('folders', 'edit', 'FOLDER-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -110,4 +110,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
 

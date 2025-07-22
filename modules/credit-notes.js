@@ -249,7 +249,7 @@ export function getFormHTML(action = 'create', data = {}) {
                 </div>
             </div>
             
-            <form id="creditNoteForm" onsubmit="app.submitModuleForm(event, 'credit-notes', '${action}', '${data.id || ''}')">
+            <form id="creditNoteForm" onsubmit="app.submitForm(event, 'credit-notes', '${action}', '${data.id || ''}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Kredit Not Məlumatları</h3>

@@ -192,7 +192,7 @@ export function getFormHTML(action = 'create', data = {}) {
                 </div>
             </div>
             
-            <form id="fixedAssetForm" onsubmit="app.submitModuleForm(event, 'fixed-assets', '${action}', '${data.id || ''}')">
+            <form id="fixedAssetForm" onsubmit="app.submitForm(event, 'fixed-assets', '${action}', '${data.id || ''}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Əsas Vəsait Məlumatları</h3>

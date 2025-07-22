@@ -31,8 +31,8 @@ export function getHTML() {
                         <td>Dell Laptop</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('bom', 'view', 'BOM-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('bom', 'edit', 'BOM-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -64,7 +64,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="bomForm" onsubmit="app.submitModuleForm(event, 'bom', '${action}', '${newId}')">
+            <form id="bomForm" onsubmit="app.submitForm(event, 'bom', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Əsas Məlumatlar</h3>

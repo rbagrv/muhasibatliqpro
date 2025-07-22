@@ -33,8 +33,8 @@ export function getHTML() {
                             <td><span class="status-badge success">Uğurlu</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('transfers', 'view', 'TRF-0001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('transfers', 'edit', 'TRF-0001')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -66,7 +66,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="transfersForm" onsubmit="app.submitModuleForm(event, 'transfers', '${action}', '${newId}')">
+            <form id="transfersForm" onsubmit="app.submitForm(event, 'transfers', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Köçürmə Məlumatları</h3>
@@ -127,3 +127,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

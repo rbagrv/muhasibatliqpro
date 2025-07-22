@@ -7,7 +7,7 @@ export function getHTML() {
         <div class="page-content">
             <div class="page-header">
                 <h1>Vergi Hesabatları</h1>
-                <p>ƏDV, sadələşdirilmiş vergi və digər vergi hesabatları.</p>
+                <p>ƏDV, gəlir vergisi, sadələşdirilmiş vergi və digər vergi hesabatları.</p>
                 <button class="btn btn-primary" onclick="app.handleEntityOp('tax-reports', 'create')">
                     <i class="fas fa-plus"></i> Yeni Hesabat
                 </button>
@@ -69,9 +69,9 @@ export function getHTML() {
                             <td><span class="status-badge completed">Təsdiqlənib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-print"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'view', 'VH-2024-001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'print', 'VH-2024-001')"><i class="fas fa-print"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'download', 'VH-2024-001')"><i class="fas fa-download"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -83,14 +83,102 @@ export function getHTML() {
                             <td><span class="status-badge pending">Gözləyir</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-upload"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'view', 'VH-2024-002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'edit', 'VH-2024-002')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'upload', 'VH-2024-002')"><i class="fas fa-upload"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>VH-2024-003</td>
+                            <td>Gəlir Vergisi</td>
+                            <td>Yanvar 2024</td>
+                            <td>₼1,500.00</td>
+                            <td><span class="status-badge completed">Təsdiqlənib</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'view', 'VH-2024-003')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'download', 'VH-2024-003')"><i class="fas fa-download"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>VH-2024-004</td>
+                            <td>Cari Vergi Hesablaması</td>
+                            <td>Fevral 2024</td>
+                            <td>₼750.00</td>
+                            <td><span class="status-badge active">Yeni</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'view', 'VH-2024-004')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('tax-reports', 'edit', 'VH-2024-004')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">Gəlir və Xərclərin Uçotu & Vergi Hesablamaları</h2>
+                <div class="data-table-container">
+                    <h3>Gəlir və Xərclərin Təhlili (Ay Üzrə)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ay</th>
+                                <th>Ümumi Gəlir</th>
+                                <th>Ümumi Xərc</th>
+                                <th>Vergidən Əvvəlki Mənfəət</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Yanvar 2024</td>
+                                <td>₼55,000</td>
+                                <td>₼35,000</td>
+                                <td>₼20,000</td>
+                            </tr>
+                            <tr>
+                                <td>Fevral 2024</td>
+                                <td>₼48,000</td>
+                                <td>₼32,000</td>
+                                <td>₼16,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Cari və Təxirə Salınmış Vergi Hesablamaları</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Vergi Növü</th>
+                                <th>Dövr</th>
+                                <th>Cari Vergi</th>
+                                <th>Təxirə Salınmış Vergi</th>
+                                <th>Ümumi Vergi Xərci</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mənfəət Vergisi</td>
+                                <td>Yanvar 2024</td>
+                                <td>₼2,000</td>
+                                <td>₼500</td>
+                                <td>₼2,500</td>
+                            </tr>
+                            <tr>
+                                <td>Mənfəət Vergisi</td>
+                                <td>Fevral 2024</td>
+                                <td>₼1,600</td>
+                                <td>₼300</td>
+                                <td>₼1,900</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;
@@ -117,7 +205,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="taxReportsForm" onsubmit="app.submitModuleForm(event, 'tax-reports', '${action}', '${newId}')">
+            <form id="taxReportsForm" onsubmit="app.submitForm(event, 'tax-reports', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Hesabat Detalları</h3>
@@ -133,6 +221,9 @@ export function getFormHTML(action = 'create', data = {}) {
                                     <option value="vat" ${data.type === 'vat' ? 'selected' : ''}>ƏDV</option>
                                     <option value="simplified" ${data.type === 'simplified' ? 'selected' : ''}>Sadələşdirilmiş</option>
                                     <option value="income-tax" ${data.type === 'income-tax' ? 'selected' : ''}>Gəlir Vergisi</option>
+                                    <option value="profit-tax" ${data.type === 'profit-tax' ? 'selected' : ''}>Mənfəət Vergisi</option>
+                                    <option value="current-deferred-tax" ${data.type === 'current-deferred-tax' ? 'selected' : ''}>Cari & Təxirə Salınmış Vergi</option>
+                                    <option value="income-expense-analysis" ${data.type === 'income-expense-analysis' ? 'selected' : ''}>Gəlir & Xərc Analizi</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -177,3 +268,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

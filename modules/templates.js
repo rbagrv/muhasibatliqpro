@@ -8,7 +8,7 @@ export function getHTML() {
         <div class="page-header">
             <h1>Şablonlar</h1>
             <p>Tez-tez istifadə olunan sənəd və formalar üçün şablonlar.</p>
-            <button class="btn btn-primary" onclick="app.navigateToForm('templates', 'create')">
+            <button class="btn btn-primary" onclick="app.handleEntityOp('templates', 'create')">
                 <i class="fas fa-plus"></i> Yeni Şablon
             </button>
         </div>
@@ -31,8 +31,8 @@ export function getHTML() {
                         <td><span class="badge badge-success">Aktiv</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('templates', 'view', 'TPL-0001')"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('templates', 'edit', 'TPL-0001')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('templates', 'view', 'TPL-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('templates', 'edit', 'TPL-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -119,4 +119,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
 

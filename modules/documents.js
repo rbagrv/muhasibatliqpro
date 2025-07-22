@@ -31,8 +31,32 @@ export function getHTML() {
                         <td><span class="badge badge-success">Aktiv</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'view', 'DOC-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'edit', 'DOC-0001')"><i class="fas fa-edit"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Satış Faktura No. SINV-2024-005</td>
+                        <td>PDF</td>
+                        <td>19.02.2024</td>
+                        <td><span class="badge badge-success">Aktiv</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'view', 'DOC-0002')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'download', 'DOC-0002')"><i class="fas fa-download"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Yanvar 2024 - P&L Hesabatı</td>
+                        <td>XLSX</td>
+                        <td>05.02.2024</td>
+                        <td><span class="badge badge-info">Arxiv</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'view', 'DOC-0003')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('documents', 'download', 'DOC-0003')"><i class="fas fa-download"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -64,7 +88,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="documentsForm" onsubmit="app.submitModuleForm(event, 'documents', '${action}', '${newId}')">
+            <form id="documentsForm" onsubmit="app.submitForm(event, 'documents', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Sənəd Məlumatları</h3>
@@ -125,3 +149,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

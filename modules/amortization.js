@@ -35,7 +35,7 @@ export function getHTML() {
                         <td><span class="status-badge completed">Hesablanıb</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('amortization', 'view', 'AMORT-0001')"><i class="fas fa-eye"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -66,7 +66,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="amortizationForm" onsubmit="app.submitModuleForm(event, 'amortization', '${action}', '${newId}')">
+            <form id="amortizationForm" onsubmit="app.submitForm(event, 'amortization', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Amortizasiya Detalları</h3>
@@ -127,3 +127,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+

@@ -11,7 +11,7 @@ export function getHTML() {
         <div class="page-header">
             <h1>Təchizatçılar</h1>
             <p>Təchizatçı şirkətlərin siyahısı və idarə olunması.</p>
-            <button class="btn btn-primary" onclick="app.navigateToForm('suppliers', 'create')">
+            <button class="btn btn-primary" onclick="app.handleEntityOp('suppliers', 'create')">
                 <i class="fas fa-plus"></i> Yeni Təchizatçı
             </button>
         </div>
@@ -36,15 +36,118 @@ export function getHTML() {
                         <td><span class="badge badge-success">Aktiv</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('suppliers', 'view', 'S-0001')"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('suppliers', 'edit', 'S-0001')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('suppliers', 'view', 'S-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('suppliers', 'edit', 'S-0001')"><i class="fas fa-edit"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>XYZ Materials LTD</td>
+                        <td>Vüqar Həsənov</td>
+                        <td>+994 12 765 43 21</td>
+                        <td>vugar@xyz-mat.com</td>
+                        <td><span class="badge badge-success">Aktiv</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('suppliers', 'view', 'S-0002')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('suppliers', 'edit', 'S-0002')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    </div>
+
+        <div class="module-section">
+            <h2 class="section-title">Kreditor Borcları Üzərində Analiz</h2>
+            <div class="data-table-container">
+                <h3>Kreditor Borcları Yaşlandırma Hesabatı</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Təchizatçı</th>
+                            <th>Faktura №</th>
+                            <th>Məbləğ</th>
+                            <th>Cari (0-30 gün)</th>
+                            <th>31-60 gün</th>
+                            <th>61-90 gün</th>
+                            <th>90+ gün</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ABC Təchizat MMC</td>
+                            <td>PINV-2024-010</td>
+                            <td>₼1,200.00</td>
+                            <td>₼1,200.00</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>XYZ Materials LTD</td>
+                            <td>PINV-2023-045</td>
+                            <td>₼850.00</td>
+                            <td>-</td>
+                            <td>₼850.00</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Global Supply Co.</td>
+                            <td>PINV-2023-030</td>
+                            <td>₼2,500.00</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>₼1,500.00</td>
+                            <td>₼1,000.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-table-container">
+                <h3>Daxil Olan və Çıxan Ödənişlər Üzərində Özet Hesabat</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tarix</th>
+                            <th>Təchizatçı</th>
+                            <th>Növ</th>
+                            <th>Məbləğ</th>
+                            <th>Valyuta</th>
+                            <th>Qeyd</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>20.02.2024</td>
+                            <td>ABC Təchizat MMC</td>
+                            <td>Ödəniş</td>
+                            <td>₼1,500.00</td>
+                            <td>AZN</td>
+                            <td>PINV-2024-009 ödənildi</td>
+                        </tr>
+                        <tr>
+                            <td>18.02.2024</td>
+                            <td>XYZ Materials LTD</td>
+                            <td>Qaytaran</td>
+                            <td>₼200.00</td>
+                            <td>AZN</td>
+                            <td>Qüsurlu mal qaytarma</td>
+                        </tr>
+                        <tr>
+                            <td>15.02.2024</td>
+                            <td>Global Supply Co.</td>
+                            <td>Ödəniş</td>
+                            <td>$500.00</td>
+                            <td>USD</td>
+                            <td>Xammal alışı</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     `;
 }
 

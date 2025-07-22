@@ -8,15 +8,64 @@ export function getHTML() {
             <div class="page-header">
                 <h1>İstehsalat</h1>
                 <p>İstehsal proseslərinin idarə edilməsi və yeni sifarişlərin yaradılması.</p>
-                <button class="btn btn-primary" onclick="app.navigateToForm('production', 'create')">
+                <button class="btn btn-primary" onclick="app.handleEntityOp('production-orders', 'create')">
                     <i class="fas fa-plus"></i> Yeni İstehsalat Sifarişi
                 </button>
             </div>
+            
+            <div class="module-overview">
+                <div class="module-stats">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>34</h3>
+                            <p>Aktiv Sifariş</p>
+                            <div class="stat-change positive">+8 bu ay</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>28</h3>
+                            <p>Tamamlanmış</p>
+                            <div class="stat-change positive">85% effektivlik</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>6</h3>
+                            <p>Gözləyən</p>
+                            <div class="stat-change neutral">İcra gözləyir</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>1,250</h3>
+                            <p>Planlaşdırılan</p>
+                            <div class="stat-change positive">Məhsul sayı</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="data-table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>Sifariş #</th>
                             <th>Məhsul</th>
                             <th>Miqdar</th>
                             <th>Başlanğıc Tarix</th>
@@ -26,20 +75,116 @@ export function getHTML() {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>1</td>
+                            <td>PRO-2024-001</td>
                             <td>Dell Laptop</td>
                             <td>25</td>
                             <td>10 Fev 2024</td>
                             <td><span class="badge badge-warning">Hazırlanır</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('production', 'view', 'PRDORD-0001')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('production', 'edit', 'PRDORD-0001')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'view', 'PRDORD-0001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('production-orders', 'edit', 'PRDORD-0001')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">İstehsalat & Maya Dəyəri Hesabatları</h2>
+                <div class="data-table-container">
+                    <h3>İstehsal Olunmuş Məhsulların Maya Dəyəri</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Məhsul</th>
+                                <th>İstehsal Miqdarı</th>
+                                <th>Ümumi Maya Dəyəri</th>
+                                <th>Vahid Maya Dəyəri</th>
+                                <th>Dövr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dell Laptop</td>
+                                <td>100 ədəd</td>
+                                <td>₼90,000</td>
+                                <td>₼900.00</td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Gaming PC</td>
+                                <td>50 ədəd</td>
+                                <td>₼75,000</td>
+                                <td>₼1,500.00</td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Xammal və Material Sərfiyyatı</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Sərfiyyat Miqdarı</th>
+                                <th>Vahid</th>
+                                <th>Ümumi Dəyər</th>
+                                <th>Dövr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CPU Intel i7</td>
+                                <td>100</td>
+                                <td>ədəd</td>
+                                <td>₼35,000</td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                            <tr>
+                                <td>RAM 8GB DDR4</td>
+                                <td>200</td>
+                                <td>ədəd</td>
+                                <td>₼10,000</td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Standart vs Faktiki Maya Müqayisəsi</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Məhsul</th>
+                                <th>Standart Maya</th>
+                                <th>Faktiki Maya</th>
+                                <th>Fərq</th>
+                                <th>Dövr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dell Laptop</td>
+                                <td>₼880.00</td>
+                                <td>₼900.00</td>
+                                <td><span class="stat-change negative">₼20.00</span></td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Gaming PC</td>
+                                <td>₼1,450.00</td>
+                                <td>₼1,500.00</td>
+                                <td><span class="stat-change negative">₼50.00</span></td>
+                                <td>Yanvar 2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;
@@ -125,4 +270,8 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+
+
 

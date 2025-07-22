@@ -38,8 +38,104 @@ export function getHTML() {
                                 </div>
                             </td>
                         </tr>
+                        <tr>
+                            <td>Leyla Həsənova</td>
+                            <td><span class="badge badge-primary">Şirkət</span></td>
+                            <td>leyla@comp.az</td>
+                            <td>+994 70 987 65 43</td>
+                            <td><span class="status-badge active">Aktiv</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'view', 'cust2')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'edit', 'cust2')"><i class="fas fa-edit"></i></button>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">Debitor Borcları Hesabatları</h2>
+                <div class="data-table-container">
+                    <h3>Debitor Borcları Yaşlandırma Hesabatı (Aging Report)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Müştəri</th>
+                                <th>Faktura №</th>
+                                <th>Məbləğ</th>
+                                <th>Cari (0-30 gün)</th>
+                                <th>31-60 gün</th>
+                                <th>61-90 gün</th>
+                                <th>90+ gün</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Əli Məmmədov</td>
+                                <td>SINV-2024-004</td>
+                                <td>₼1,003.00</td>
+                                <td>₼1,003.00</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>Vüqar Abbasov</td>
+                                <td>SINV-2024-006</td>
+                                <td>₼796.50</td>
+                                <td>-</td>
+                                <td>₼796.50</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>Test Şirkəti MMC</td>
+                                <td>SINV-2023-123</td>
+                                <td>₼2,500.00</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>₼1,500.00</td>
+                                <td>₼1,000.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Gecikmiş Ödənişlər Üzərində Xəbərdarlıq Hesabatı</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Müştəri</th>
+                                <th>Faktura №</th>
+                                <th>Məbləğ</th>
+                                <th>Ödəniş Tarixi</th>
+                                <th>Gecikmə Günləri</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Vüqar Abbasov</td>
+                                <td>SINV-2024-006</td>
+                                <td>₼796.50</td>
+                                <td>05.02.2024</td>
+                                <td>15</td>
+                                <td><span class="status-badge inactive">Vaxtı Keçib</span></td>
+                            </tr>
+                            <tr>
+                                <td>Test Şirkəti MMC</td>
+                                <td>SINV-2023-123</td>
+                                <td>₼1,000.00</td>
+                                <td>01.01.2024</td>
+                                <td>50</td>
+                                <td><span class="status-badge inactive">Vaxtı Keçib</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;
@@ -169,4 +265,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
 

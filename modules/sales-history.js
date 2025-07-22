@@ -6,7 +6,7 @@ export function getHTML() {
     return `
         <div class="page-content">
             <div class="page-header">
-                <h1>Satış Tarixçəsi</h1>
+                <h1>Satış Tarixçəsi və Hesabatları</h1>
                 <p>Aparılan satış əməliyyatlarının tarixçəsi və analitikası.</p>
                 <button class="btn btn-primary" onclick="app.handleEntityOp('sales-history', 'create')">
                     <i class="fas fa-plus"></i> Yeni Satış Əlavə Et
@@ -33,12 +33,141 @@ export function getHTML() {
                             <td><span class="status-badge paid">Ödənilib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('sales-history', 'view', 'SINV-2024-004')"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SINV-2024-005</td>
+                            <td>Leyla Həsənova</td>
+                            <td>19.02.2024</td>
+                            <td>₼2,891.00</td>
+                            <td><span class="status-badge completed">Tamamlandı</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('sales-history', 'view', 'SINV-2024-005')"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SINV-2024-006</td>
+                            <td>Vüqar Abbasov</td>
+                            <td>20.02.2024</td>
+                            <td>₼796.50</td>
+                            <td><span class="status-badge inactive">Vaxtı keçib</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('sales-history', 'view', 'SINV-2024-006')"><i class="fas fa-eye"></i></button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="module-section">
+                <h2 class="section-title">Satış Hesabatları</h2>
+                <div class="data-table-container">
+                    <h3>Məhsul Üzrə Satış Performansı</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Məhsul Adı</th>
+                                <th>Satış Miqdarı</th>
+                                <th>Ümumi Gəlir</th>
+                                <th>Ən Çox Satılan Region</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dell Laptop Inspiron 15</td>
+                                <td>50</td>
+                                <td>₼60,000</td>
+                                <td>Bakı</td>
+                            </tr>
+                            <tr>
+                                <td>Logitech Wireless Mouse</td>
+                                <td>150</td>
+                                <td>₼6,750</td>
+                                <td>Gəncə</td>
+                            </tr>
+                            <tr>
+                                <td>Samsung Galaxy A54</td>
+                                <td>80</td>
+                                <td>₼36,000</td>
+                                <td>Sumqayıt</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Müştəri Üzrə Satış Dəyəri</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Müştəri</th>
+                                <th>Ümumi Alış Dəyəri</th>
+                                <th>Son Alış Tarixi</th>
+                                <th>Alış Sayı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Əli Məmmədov</td>
+                                <td>₼15,500.00</td>
+                                <td>18.02.2024</td>
+                                <td>8</td>
+                            </tr>
+                            <tr>
+                                <td>Leyla Həsənova</td>
+                                <td>₼8,200.00</td>
+                                <td>19.02.2024</td>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <td>Vüqar Abbasov</td>
+                                <td>₼3,100.00</td>
+                                <td>20.02.2024</td>
+                                <td>3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-table-container">
+                    <h3>Region Üzrə Satış Həcmi</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Region</th>
+                                <th>Ümumi Satış Həcmi</th>
+                                <th>Satış Sayı</th>
+                                <th>Orta Satış Dəyəri</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bakı</td>
+                                <td>₼85,000.00</td>
+                                <td>120</td>
+                                <td>₼708.33</td>
+                            </tr>
+                            <tr>
+                                <td>Gəncə</td>
+                                <td>₼25,000.00</td>
+                                <td>45</td>
+                                <td>₼555.56</td>
+                            </tr>
+                            <tr>
+                                <td>Sumqayıt</td>
+                                <td>₼18,000.00</td>
+                                <td>30</td>
+                                <td>₼600.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     `;
@@ -65,7 +194,7 @@ export function getFormHTML(action = 'create', data = {}) {
                     </button>
                 </div>
             </div>
-            <form id="salesHistoryForm" onsubmit="app.submitModuleForm(event, 'sales-history', '${action}', '${newId}')">
+            <form id="salesHistoryForm" onsubmit="app.submitForm(event, 'sales-history', '${action}', '${newId}')">
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Satış Detalları</h3>
@@ -138,3 +267,6 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
+
+
+

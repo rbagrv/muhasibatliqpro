@@ -17,6 +17,7 @@ const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const TelegramBot = require('node-telegram-bot-api'); 
 require('dotenv').config();
 
 // Security Configuration
@@ -47,6 +48,14 @@ class ModernBackendServer {
         // Initialize database connection
         this.initializeDatabase();
         
+        // Setup Telegram Bot for notifications
+        if (process.env.TELEGRAM_BOT_TOKEN) {
+            this.telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
+            console.log('✅ Telegram Bot client initialized.');
+        } else {
+            console.warn('⚠️ TELEGRAM_BOT_TOKEN not found in .env, Telegram notifications will be disabled.');
+        }
+
         // Setup middleware
         this.setupSecurityMiddleware();
         this.setupCorsMiddleware();
@@ -69,6 +78,9 @@ class ModernBackendServer {
         
         // Initialize database schema
         this.initializeDatabaseSchema();
+
+        // Start billing scheduler
+        this.startBillingScheduler();
     }
 
     initializeDatabase() {
@@ -140,7 +152,7 @@ class ModernBackendServer {
                     styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
                     fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
                     scriptSrc: ["'self'", "'unsafe-inline'", "https://esm.sh"],
-                    connectSrc: ["'self'", "wss:", "https://esm.sh"],
+                    connectSrc: ["'self'", "wss:", "https://esm.sh", "https://api.telegram.org"],
                     imgSrc: ["'self'", "data:", "https:"],
                     objectSrc: ["'none'"],
                     mediaSrc: ["'self'"],
@@ -233,7 +245,7 @@ class ModernBackendServer {
                 timestamp: new Date().toISOString(),
                 ip: req.ip || req.connection.remoteAddress,
                 userAgent: req.get('User-Agent'),
-                tenantId: req.headers['x-tenant-id']
+                tenantId: req.headers['x-tenant-id'] // Retrieve X-Tenant-ID
             };
             
             res.setHeader('X-Request-ID', req.context.requestId);
@@ -310,6 +322,9 @@ class ModernBackendServer {
                     'PostgreSQL with Row Level Security',
                     'RESTful API with Validation',
                     'Comprehensive Audit Logging',
+                    'Frontend Error Tracking',
+                    'Performance Monitoring',
+                    'Alert System (Telegram)',
                     'Modern ES6+ Patterns'
                 ],
                 security: {
@@ -325,6 +340,20 @@ class ModernBackendServer {
         // Authentication Routes
         this.setupAuthRoutes();
         
+        // Apply authentication and tenant active status check globally for /api/v2/ routes (except auth)
+        // Note: Specific role checks (e.g., superadmin) will be applied after authentication.
+        this.app.use('/api/v2/accounting', this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this));
+        this.app.use('/api/v2/pos', this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this));
+        this.app.use('/api/v2/reports', this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this));
+        this.app.use('/api/v2/integrations', this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this));
+        this.app.use('/api/v2/admin', this.authenticateToken.bind(this), this.requireAdminRole.bind(this), this.checkTenantActiveStatus.bind(this));
+        
+        // Business Management Routes (SuperAdmin Only)
+        this.app.use('/api/v2/businesses', this.authenticateToken.bind(this), this.requireSuperAdminRole.bind(this), this.checkTenantActiveStatus.bind(this));
+        
+        // User Management Routes (SuperAdmin can manage all, Tenant Admin can manage own tenant)
+        this.app.use('/api/v2/users', this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this)); // Role check applied within handlers
+
         // Business Management Routes
         this.setupBusinessRoutes();
         
@@ -345,6 +374,10 @@ class ModernBackendServer {
         
         // Admin Routes
         this.setupAdminRoutes();
+
+        // New Logging Endpoints for frontend
+        this.app.post('/api/v2/log-error', this.validateFrontendErrorLog.bind(this), this.logFrontendError.bind(this));
+        this.app.post('/api/v2/performance-log', this.validatePerformanceLog.bind(this), this.logPerformanceMetric.bind(this));
     }
 
     setupAuthRoutes() {
@@ -381,60 +414,52 @@ class ModernBackendServer {
     setupBusinessRoutes() {
         // Get all businesses/tenants
         this.app.get('/api/v2/businesses',
-            this.authenticateToken.bind(this),
             this.getBusinesses.bind(this)
         );
 
         // Create new business
         this.app.post('/api/v2/businesses',
-            this.authenticateToken.bind(this),
             this.validateBusinessRequest.bind(this),
             this.createBusiness.bind(this)
         );
 
         // Get business details
         this.app.get('/api/v2/businesses/:id',
-            this.authenticateToken.bind(this),
             this.getBusiness.bind(this)
         );
 
         // Update business
         this.app.put('/api/v2/businesses/:id',
-            this.authenticateToken.bind(this),
+            this.validateBusinessRequest.bind(this),
             this.updateBusiness.bind(this)
         );
 
         // Delete business
         this.app.delete('/api/v2/businesses/:id',
-            this.authenticateToken.bind(this),
             this.deleteBusiness.bind(this)
         );
     }
 
     setupUserRoutes() {
         this.app.get('/api/v2/users',
-            this.authenticateToken.bind(this),
             this.getUsers.bind(this)
         );
 
         this.app.post('/api/v2/users',
-            this.authenticateToken.bind(this),
             this.validateUserRequest.bind(this),
             this.createUser.bind(this)
         );
 
         this.app.get('/api/v2/users/:id',
-            this.authenticateToken.bind(this),
             this.getUser.bind(this)
         );
 
         this.app.put('/api/v2/users/:id',
-            this.authenticateToken.bind(this),
+            this.validateUserRequest.bind(this),
             this.updateUser.bind(this)
         );
 
         this.app.delete('/api/v2/users/:id',
-            this.authenticateToken.bind(this),
             this.deleteUser.bind(this)
         );
     }
@@ -442,106 +467,94 @@ class ModernBackendServer {
     setupAccountingRoutes() {
         // Chart of Accounts
         this.app.get('/api/v2/accounting/chart-of-accounts',
-            this.authenticateToken.bind(this),
             this.getChartOfAccounts.bind(this)
         );
 
         this.app.post('/api/v2/accounting/chart-of-accounts',
-            this.authenticateToken.bind(this),
             this.validateAccountRequest.bind(this),
             this.createAccount.bind(this)
         );
+        this.app.get('/api/v2/accounting/chart-of-accounts/:id', this.getAccount.bind(this));
+        this.app.put('/api/v2/accounting/chart-of-accounts/:id', this.updateAccount.bind(this));
+        this.app.delete('/api/v2/accounting/chart-of-accounts/:id', this.deleteAccount.bind(this));
 
         // Journal Entries
         this.app.get('/api/v2/accounting/journal-entries',
-            this.authenticateToken.bind(this),
             this.getJournalEntries.bind(this)
         );
 
         this.app.post('/api/v2/accounting/journal-entries',
-            this.authenticateToken.bind(this),
             this.validateJournalEntryRequest.bind(this),
             this.createJournalEntry.bind(this)
         );
+        this.app.get('/api/v2/accounting/journal-entries/:id', this.getJournalEntry.bind(this));
+        this.app.put('/api/v2/accounting/journal-entries/:id', this.updateJournalEntry.bind(this));
+        this.app.delete('/api/v2/accounting/journal-entries/:id', this.deleteJournalEntry.bind(this));
     }
 
     setupPOSRales() {
         // Products
         this.app.get('/api/v2/pos/products',
-            this.authenticateToken.bind(this),
             this.getProducts.bind(this)
         );
 
         this.app.post('/api/v2/pos/products',
-            this.authenticateToken.bind(this),
             this.validateProductRequest.bind(this),
             this.createProduct.bind(this)
         );
+        this.app.get('/api/v2/pos/products/:id', this.getProduct.bind(this));
+        this.app.put('/api/v2/pos/products/:id', this.updateProduct.bind(this));
+        this.app.delete('/api/v2/pos/products/:id', this.deleteProduct.bind(this));
 
         // Sales
         this.app.get('/api/v2/pos/sales',
-            this.authenticateToken.bind(this),
             this.getSales.bind(this)
         );
 
         this.app.post('/api/v2/pos/sales',
-            this.authenticateToken.bind(this),
             this.validateSaleRequest.bind(this),
             this.createSale.bind(this)
         );
+        this.app.get('/api/v2/pos/sales/:id', this.getSale.bind(this));
+        this.app.put('/api/v2/pos/sales/:id', this.updateSale.bind(this));
+        this.app.delete('/api/v2/pos/sales/:id', this.deleteSale.bind(this));
     }
 
     setupReportsRoutes() {
         this.app.get('/api/v2/reports/dashboard',
-            this.authenticateToken.bind(this),
             this.getDashboardReports.bind(this)
-        );
-
-        this.app.get('/api/v2/reports/financial',
-            this.authenticateToken.bind(this),
-            this.getFinancialReports.bind(this)
-        );
-
-        this.app.get('/api/v2/reports/sales',
-            this.authenticateToken.bind(this),
-            this.getSalesReports.bind(this)
         );
     }
 
     setupIntegrationRoutes() {
-        // Telegram
-        this.app.get('/api/v2/integrations/telegram',
-            this.authenticateToken.bind(this),
-            this.getTelegramConfig.bind(this)
+        // Tenant-specific Telegram settings
+        this.app.get('/api/v2/integrations/telegram-settings/:businessId',
+            this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this), // Apply auth and tenant check
+            this.getTenantTelegramSettings.bind(this)
+        );
+        this.app.put('/api/v2/integrations/telegram-settings/:businessId',
+            this.authenticateToken.bind(this), this.checkTenantActiveStatus.bind(this), this.requireAdminRole.bind(this), // Only admin/superadmin can update
+            this.validateTelegramSettingsRequest.bind(this),
+            this.updateTenantTelegramSettings.bind(this)
         );
 
-        this.app.post('/api/v2/integrations/telegram',
-            this.authenticateToken.bind(this),
-            this.updateTelegramConfig.bind(this)
-        );
-
-        // WhatsApp routes
+        // WhatsApp routes (already exists, but ensures it's under integration)
         this.app.post('/api/v2/whatsapp/connect',
-            this.authenticateToken.bind(this),
+            this.authenticateToken.bind(this), this.requireAdminRole.bind(this), // Admin only
             this.connectWhatsApp.bind(this)
         );
 
         this.app.post('/api/v2/whatsapp/disconnect',
-            this.authenticateToken.bind(this),
+            this.authenticateToken.bind(this), this.requireAdminRole.bind(this), // Admin only
             this.disconnectWhatsApp.bind(this)
         );
+        
+        // No /api/v2/settings/whatsapp in main app, it's global for backend.
+        // It's covered by `getGlobalTelegramSettings` for the frontend to read.
+        // If frontend needs to read general WhatsApp settings that backend stores,
+        // it would be through a specific API route.
 
-        this.app.get('/api/v2/settings/whatsapp',
-            this.authenticateToken.bind(this),
-            this.getWhatsAppSettings.bind(this)
-        );
-
-        this.app.post('/api/v2/settings/whatsapp',
-            this.authenticateToken.bind(this),
-            this.saveWhatsAppSettings.bind(this)
-        );
-
-        // Webhooks
+        // Webhooks (telegram webhook already exists)
         this.app.post('/api/v2/webhooks/telegram',
             this.handleTelegramWebhook.bind(this)
         );
@@ -549,15 +562,16 @@ class ModernBackendServer {
 
     setupAdminRoutes() {
         this.app.get('/api/v2/admin/audit-logs',
-            this.authenticateToken.bind(this),
-            this.requireAdminRole.bind(this),
             this.getAuditLogs.bind(this)
         );
 
         this.app.get('/api/v2/admin/system-stats',
-            this.authenticateToken.bind(this),
-            this.requireAdminRole.bind(this),
             this.getSystemStats.bind(this)
+        );
+
+        // Global Telegram Settings (Read-only from .env for frontend display)
+        this.app.get('/api/v2/admin/global-telegram-settings',
+            this.getGlobalTelegramSettings.bind(this)
         );
     }
 
@@ -698,12 +712,12 @@ class ModernBackendServer {
                         try {
                             // For a multi-tenant system, we need to associate the WhatsApp number with a tenant.
                             // For this demo, we'll fetch data from the first available business.
-                            const { rows: businesses } = await this.db.query('SELECT id, name FROM businesses WHERE status = ? ORDER BY created_at LIMIT 1', ['active']);
+                            const { rows: businesses } = await this.db.query('SELECT id, name FROM businesses WHERE is_active = TRUE ORDER BY created_at LIMIT 1', []);
                             
                             if (businesses.length > 0) {
                                 const business = businesses[0];
                                 const { rows: products } = await this.db.query(
-                                    'SELECT name, quantity, unit, min_quantity FROM products WHERE business_id = ? AND is_active = true ORDER BY name ASC LIMIT 10', 
+                                    'SELECT name, quantity, unit, min_quantity FROM products WHERE business_id = $1 AND is_active = true ORDER BY name ASC LIMIT 10', 
                                     [business.id]
                                 );
                                 
@@ -793,24 +807,29 @@ class ModernBackendServer {
     }
 
     setupErrorHandling() {
-        // 404 handler
-        this.app.use('*', (req, res) => {
-            res.status(404).json({
-                error: 'Endpoint Not Found',
-                message: `${req.method} ${req.originalUrl} is not a valid endpoint`,
-                suggestions: [
-                    'Check the API documentation at /api/v2',
-                    'Verify the HTTP method and URL path',
-                    'Ensure you are using the correct API version (v2)'
-                ],
-                timestamp: new Date().toISOString(),
-                requestId: req.context?.requestId
-            });
-        });
-
-        // Global error handler
+        // Global error handler for Express
         this.app.use((err, req, res, next) => {
-            console.error(`[${req.context?.requestId}] Error:`, err);
+            console.error(`[${req.context?.requestId || 'N/A'}] Backend Error:`, err.stack);
+
+            // Log error to database
+            this.logErrorToDatabase({
+                type: 'backend_error',
+                message: err.message,
+                stack: err.stack,
+                url: req.originalUrl,
+                method: req.method,
+                ip: req.context?.ip,
+                userAgent: req.context?.userAgent,
+                level: 'error'
+            });
+
+            // Send Telegram alert
+            const telegramMessage = `🚨 Backend Xətası [${this.isProduction ? 'PROD' : 'DEV'}]:\n` +
+                                  `Mesaj: ${err.message}\n` +
+                                  `URL: ${req.method} ${req.originalUrl}\n` +
+                                  `Vaxt: ${new Date().toLocaleString('az-AZ')}\n` +
+                                  `Stack: \`\`\`${err.stack ? err.stack.substring(0, 1000) : 'N/A'}\`\`\``; // Limit stack for Telegram
+            this.sendTelegramNotification(telegramMessage);
             
             // Validation errors
             if (err.name === 'ValidationError' || err.isJoi) {
@@ -855,6 +874,21 @@ class ModernBackendServer {
                 message: this.isProduction ? 'Something went wrong' : err.message,
                 requestId: req.context?.requestId,
                 ...(this.isProduction ? {} : { stack: err.stack })
+            });
+        });
+
+        // 404 handler
+        this.app.use('*', (req, res) => {
+            res.status(404).json({
+                error: 'Endpoint Not Found',
+                message: `${req.method} ${req.originalUrl} is not a valid endpoint`,
+                suggestions: [
+                    'Check the API documentation at /api/v2',
+                    'Verify the HTTP method and URL path',
+                    'Ensure you are using the correct API version (v2)'
+                ],
+                timestamp: new Date().toISOString(),
+                requestId: req.context?.requestId
             });
         });
     }
@@ -988,6 +1022,12 @@ class ModernBackendServer {
                 status VARCHAR(50) DEFAULT 'active',
                 settings JSONB DEFAULT '{}',
                 limits JSONB DEFAULT '{"users": 10, "transactions": 1000}',
+                next_billing_date DATE, -- New field for billing
+                is_active BOOLEAN DEFAULT TRUE, -- New field for operational status
+                warning_sent BOOLEAN DEFAULT FALSE, -- New field for billing warning status
+                telegram_chat_id TEXT, -- New: for tenant-specific Telegram notifications
+                telegram_notifications_enabled BOOLEAN DEFAULT FALSE, -- New: enable/disable tenant Telegram notifications
+                telegram_notification_types JSONB DEFAULT '[]', -- New: specific types of notifications for tenant
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
@@ -1087,6 +1127,22 @@ class ModernBackendServer {
                 user_agent TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
+            
+            // Error logs for tracking frontend and backend errors
+            `CREATE TABLE IF NOT EXISTS error_logs (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                type TEXT NOT NULL,         -- e.g., 'frontend_error', 'unhandled_rejection', 'backend_error', 'performance_metric'
+                message TEXT,               -- Error message or performance summary
+                stack TEXT,                 -- Stack trace for errors
+                source TEXT,                -- Source file for frontend errors
+                lineno INT,                 -- Line number for frontend errors
+                colno INT,                  -- Column number for frontend errors
+                url TEXT,                   -- URL where the error occurred or performance was measured
+                method TEXT,                -- HTTP method for backend errors, or 'GET' for frontend
+                level TEXT DEFAULT 'error', -- Severity level: 'error', 'warning', 'info', 'debug'
+                metadata JSONB DEFAULT '{}', -- Additional JSON data (e.g., user agent, IP, custom data)
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
 
             // Create indexes
             `CREATE INDEX IF NOT EXISTS idx_users_business_id ON users(business_id)`,
@@ -1094,7 +1150,9 @@ class ModernBackendServer {
             `CREATE INDEX IF NOT EXISTS idx_chart_accounts_business_id ON chart_of_accounts(business_id)`,
             `CREATE INDEX IF NOT EXISTS idx_products_business_id ON products(business_id)`,
             `CREATE INDEX IF NOT EXISTS idx_sales_business_id ON sales(business_id)`,
-            `CREATE INDEX IF NOT EXISTS idx_audit_logs_business_id ON audit_logs(business_id)`
+            `CREATE INDEX IF NOT EXISTS idx_audit_logs_business_id ON audit_logs(business_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_error_logs_type ON error_logs(type)`,
+            `CREATE INDEX IF NOT EXISTS idx_error_logs_created_at ON error_logs(created_at)`
         ];
     }
     
@@ -1110,6 +1168,12 @@ class ModernBackendServer {
                 status VARCHAR(50) DEFAULT 'active',
                 settings JSON,
                 limits JSON,
+                next_billing_date DATE,
+                is_active BOOLEAN DEFAULT TRUE,
+                warning_sent BOOLEAN DEFAULT FALSE,
+                telegram_chat_id TEXT, -- New: for tenant-specific Telegram notifications
+                telegram_notifications_enabled BOOLEAN DEFAULT FALSE, -- New: enable/disable tenant Telegram notifications
+                telegram_notification_types JSON DEFAULT '[]', -- New: specific types of notifications for tenant
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`,
@@ -1219,13 +1283,31 @@ class ModernBackendServer {
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )`,
             
+            // Error logs for tracking frontend and backend errors
+            `CREATE TABLE IF NOT EXISTS error_logs (
+                id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+                type TEXT NOT NULL,         -- e.g., 'frontend_error', 'unhandled_rejection', 'backend_error', 'performance_metric'
+                message TEXT,               -- Error message or performance summary
+                stack TEXT,                 -- Stack trace for errors
+                source TEXT,                -- Source file for frontend errors
+                lineno INT,                 -- Line number for frontend errors
+                colno INT,                  -- Column number for frontend errors
+                url TEXT,                   -- URL where the error occurred or performance was measured
+                method TEXT,                -- HTTP method for backend errors, or 'GET' for frontend
+                level TEXT DEFAULT 'error', -- Severity level: 'error', 'warning', 'info', 'debug'
+                metadata JSON,              -- Additional JSON data (e.g., user agent, IP, custom data)
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+            
             // Indexes
             `CREATE INDEX IF NOT EXISTS idx_users_business_id ON users(business_id)`,
             `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
             `CREATE INDEX IF NOT EXISTS idx_chart_accounts_business_id ON chart_of_accounts(business_id)`,
             `CREATE INDEX IF NOT EXISTS idx_products_business_id ON products(business_id)`,
             `CREATE INDEX IF NOT EXISTS idx_sales_business_id ON sales(business_id)`,
-            `CREATE INDEX IF NOT EXISTS idx_audit_logs_business_id ON audit_logs(business_id)`
+            `CREATE INDEX IF NOT EXISTS idx_audit_logs_business_id ON audit_logs(business_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_error_logs_type ON error_logs(type)`,
+            `CREATE INDEX IF NOT EXISTS idx_error_logs_created_at ON error_logs(created_at)`
         ];
     }
 
@@ -1239,43 +1321,106 @@ class ModernBackendServer {
             }
             
             // Insert demo data (your example data)
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const threeDaysLater = new Date(today);
+            threeDaysLater.setDate(today.getDate() + 3);
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(today.getMonth() + 1);
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(today.getMonth() - 1);
+
             const businessesData = [
                 {
+                    id: 'f87a8f8a-c603-4f9e-a89e-3d8b8e0b0b0b', 
                     name: 'ABC Şirkəti',
                     domain: 'abc.muhasibatliqpro.az',
                     subdomain: 'abc',
                     plan: 'professional',
-                    limits: '{"users": 50, "transactions": 10000}'
+                    limits: '{"users": 50, "transactions": 10000}',
+                    next_billing_date: nextMonth.toISOString().split('T')[0],
+                    is_active: true,
+                    warning_sent: false,
+                    telegram_chat_id: null, // Default: no tenant chat ID
+                    telegram_notifications_enabled: false,
+                    telegram_notification_types: []
                 },
                 {
+                    id: 'd1e2f3a4-5b6c-7d8e-9f0a-1b2c3d4e5f6a', 
                     name: 'XYZ Holdings MMC',
                     domain: 'xyz.muhasibatliqpro.az',
                     subdomain: 'xyz',
                     plan: 'enterprise',
-                    limits: '{"users": 100, "transactions": 50000}'
+                    limits: '{"users": 100, "transactions": 50000}',
+                    next_billing_date: threeDaysLater.toISOString().split('T')[0],
+                    is_active: true,
+                    warning_sent: false,
+                    telegram_chat_id: 'YOUR_XYZ_TENANT_CHAT_ID', // Example for XYZ
+                    telegram_notifications_enabled: true,
+                    telegram_notification_types: ['new_sales', 'daily_report']
                 },
                 {
+                    id: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 
                     name: 'Demo Biznes',
                     domain: 'demo.muhasibatliqpro.az',
                     subdomain: 'demo',
                     plan: 'basic',
-                    limits: '{"users": 10, "transactions": 1000}'
+                    limits: '{"users": 10, "transactions": 1000}',
+                    next_billing_date: lastMonth.toISOString().split('T')[0],
+                    is_active: false, 
+                    warning_sent: true,
+                    telegram_chat_id: null,
+                    telegram_notifications_enabled: false,
+                    telegram_notification_types: []
                 }
             ];
 
+            const businessInsertQuery = `
+                INSERT INTO businesses (id, name, domain, subdomain, plan, limits, next_billing_date, is_active, warning_sent, telegram_chat_id, telegram_notifications_enabled, telegram_notification_types) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id
+            `;
             for (const biz of businessesData) {
-                await this.db.query(`
-                    INSERT INTO businesses (name, domain, subdomain, plan, limits) 
-                    VALUES ($1, $2, $3, $4, $5)
-                `, [biz.name, biz.domain, biz.subdomain, biz.plan, biz.limits]);
+                const result = await this.db.query(businessInsertQuery, [
+                    biz.id, biz.name, biz.domain, biz.subdomain, biz.plan,
+                    JSON.stringify(biz.limits), biz.next_billing_date, biz.is_active, biz.warning_sent,
+                    biz.telegram_chat_id, biz.telegram_notifications_enabled, JSON.stringify(biz.telegram_notification_types)
+                ]);
+                const businessIds = {};
+                businessIds[biz.name] = result.rows[0].id;
             }
 
             // Insert demo users with hashed passwords
             const hashedPassword = await bcrypt.hash('demo123', 10);
+            const superAdminPassword = await bcrypt.hash('superadmin123', 10);
+
+            // SuperAdmin user (global)
             await this.db.query(`
-                INSERT INTO users (email, password_hash, first_name, last_name, role)
-                VALUES ($1, $2, $3, $4, $5)
-            `, ['r.bagrv1@gmail.com', hashedPassword, 'Rəşad', 'Bağırov', 'superadmin']);
+                INSERT INTO users (email, password_hash, first_name, last_name, role, business_id, is_active)
+                VALUES ($1, $2, $3, $4, $5, NULL, TRUE)
+                ON CONFLICT (email) DO NOTHING
+            `, ['r.bagrv1@gmail.com', superAdminPassword, 'Rəşad', 'Bağırov', 'superadmin']);
+
+            // Tenant Admin for ABC Şirkəti
+            await this.db.query(`
+                INSERT INTO users (email, password_hash, first_name, last_name, role, business_id, is_active)
+                VALUES ($1, $2, $3, $4, $5, $6, TRUE)
+                ON CONFLICT (email) DO NOTHING
+            `, ['admin@abc.com', hashedPassword, 'Admin', 'ABC', 'admin', businessIds['ABC Şirkəti']]);
+
+            // Regular user for ABC Şirkəti
+            await this.db.query(`
+                INSERT INTO users (email, password_hash, first_name, last_name, role, business_id, is_active)
+                VALUES ($1, $2, $3, $4, $5, $6, TRUE)
+                ON CONFLICT (email) DO NOTHING
+            `, ['user1@abc.com', hashedPassword, 'UserOne', 'ABC', 'user', businessIds['ABC Şirkəti']]);
+
+            // Tenant Admin for XYZ Holdings MMC
+            await this.db.query(`
+                INSERT INTO users (email, password_hash, first_name, last_name, role, business_id, is_active)
+                VALUES ($1, $2, $3, $4, $5, $6, TRUE)
+                ON CONFLICT (email) DO NOTHING
+            `, ['admin@xyz.com', hashedPassword, 'Admin', 'XYZ', 'admin', businessIds['XYZ Holdings MMC']]);
 
         } catch (error) {
             console.error('Error inserting sample data:', error);
@@ -1287,7 +1432,9 @@ class ModernBackendServer {
         const schema = Joi.object({
             email: Joi.string().email().required(),
             password: Joi.string().min(1).required(),
-            rememberMe: Joi.boolean().default(false)
+            rememberMe: Joi.boolean().default(false),
+            // Allow tenant_id for direct login to specific tenant context if needed, but not required for general login flow
+            tenantId: Joi.string().uuid().optional().allow(null) 
         });
 
         const { error } = schema.validate(req.body);
@@ -1327,7 +1474,11 @@ class ModernBackendServer {
             subdomain: Joi.string().alphanum().min(2).max(20).required(),
             plan: Joi.string().valid('basic', 'professional', 'enterprise').default('basic'),
             type: Joi.string().valid('retail', 'wholesale', 'service', 'manufacturing', 'other').default('other'),
-            description: Joi.string().allow('')
+            description: Joi.string().allow(''),
+            // New Telegram fields for business creation (optional on creation)
+            telegramChatId: Joi.string().allow(null, '').optional(),
+            telegramNotificationsEnabled: Joi.boolean().default(false),
+            telegramNotificationTypes: Joi.array().items(Joi.string()).default([])
         });
 
         const { error } = schema.validate(req.body);
@@ -1343,11 +1494,13 @@ class ModernBackendServer {
     validateUserRequest(req, res, next) {
         const schema = Joi.object({
             email: Joi.string().email().required(),
-            password: Joi.string().min(6).required(),
+            password: Joi.string().min(6).optional().allow(''), // Password can be optional on update
             firstName: Joi.string().min(1).required(),
             lastName: Joi.string().min(1).required(),
-            role: Joi.string().valid('admin', 'user', 'accountant', 'manager').default('user'),
-            permissions: Joi.array().items(Joi.string()).default([])
+            role: Joi.string().valid('admin', 'user', 'accountant', 'manager', 'superadmin').default('user'),
+            permissions: Joi.array().items(Joi.string()).default([]),
+            businessId: Joi.string().uuid().optional().allow(null),
+            is_active: Joi.boolean().optional() // Allow updating user active status
         });
 
         const { error } = schema.validate(req.body);
@@ -1360,97 +1513,19 @@ class ModernBackendServer {
         next();
     }
 
-    validateAccountRequest(req, res, next) {
+    // New validation for Telegram settings update
+    validateTelegramSettingsRequest(req, res, next) {
         const schema = Joi.object({
-            code: Joi.string().min(1).max(20).required(),
-            name: Joi.string().min(1).max(255).required(),
-            accountType: Joi.string().valid('Asset', 'Liability', 'Equity', 'Revenue', 'Expense').required(),
-            parentId: Joi.string().uuid().allow(null),
-            balance: Joi.number().default(0),
-            currency: Joi.string().length(3).default('AZN')
+            telegramChatId: Joi.string().allow(null, '').optional(),
+            telegramNotificationsEnabled: Joi.boolean().default(false),
+            telegramNotificationTypes: Joi.array().items(Joi.string()).default([])
         });
 
         const { error } = schema.validate(req.body);
         if (error) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Validation Error',
-                message: error.details[0].message 
-            });
-        }
-        next();
-    }
-
-    validateJournalEntryRequest(req, res, next) {
-        const schema = Joi.object({
-            date: Joi.date().required(),
-            description: Joi.string().required(),
-            reference: Joi.string().allow(''),
-            entries: Joi.array().items(
-                Joi.object({
-                    accountId: Joi.string().uuid().required(),
-                    debitAmount: Joi.number().min(0),
-                    creditAmount: Joi.number().min(0),
-                    description: Joi.string().allow('')
-                })
-            ).min(2).required()
-        });
-
-        const { error } = schema.validate(req.body);
-        if (error) {
-            return res.status(400).json({ 
-                error: 'Validation Error',
-                message: error.details[0].message 
-            });
-        }
-        next();
-    }
-
-    validateProductRequest(req, res, next) {
-        const schema = Joi.object({
-            name: Joi.string().min(1).required(),
-            description: Joi.string().allow(''),
-            sku: Joi.string().allow(''),
-            barcode: Joi.string().allow(''),
-            price: Joi.number().min(0).required(),
-            cost: Joi.number().min(0),
-            quantity: Joi.number().integer().min(0).default(0),
-            minQuantity: Joi.number().integer().min(0).default(0),
-            category: Joi.string().allow(''),
-            unit: Joi.string().default('pcs'),
-            taxRate: Joi.number().min(0).max(100).default(18)
-        });
-
-        const { error } = schema.validate(req.body);
-        if (error) {
-            return res.status(400).json({ 
-                error: 'Validation Error',
-                message: error.details[0].message 
-            });
-        }
-        next();
-    }
-
-    validateSaleRequest(req, res, next) {
-        const schema = Joi.object({
-            customerId: Joi.string().uuid().allow(null),
-            items: Joi.array().items(
-                Joi.object({
-                    productId: Joi.string().uuid().required(),
-                    quantity: Joi.number().min(0.001).required(),
-                    unitPrice: Joi.number().min(0).required(),
-                    taxRate: Joi.number().min(0).max(100).default(18),
-                    discountAmount: Joi.number().min(0).default(0)
-                })
-            ).min(1).required(),
-            paymentMethod: Joi.string().valid('cash', 'card', 'bank_transfer', 'other').required(),
-            notes: Joi.string().allow('')
-        });
-
-        const { error } = schema.validate(req.body);
-        if (error) {
-            return res.status(400).json({ 
-                error: 'Validation Error',
-                message: error.details[0].message 
+                message: error.details[0].message
             });
         }
         next();
@@ -1476,13 +1551,42 @@ class ModernBackendServer {
                 });
             }
             
-            req.user = user;
-            
+            // Re-fetch user to get latest status, esp. is_active
+            try {
+                const userResult = await this.db.query(`
+                    SELECT u.*, b.is_active as business_is_active, b.id as business_uuid
+                    FROM users u
+                    LEFT JOIN businesses b ON u.business_id = b.id
+                    WHERE u.id = $1
+                `, [user.userId]);
+
+                if (userResult.rows.length === 0) {
+                    return res.status(404).json({
+                        error: 'User Not Found',
+                        message: 'Authenticated user not found in database.'
+                    });
+                }
+                const fullUser = userResult.rows[0];
+                req.user = {
+                    ...user, 
+                    is_active: fullUser.is_active, 
+                    businessId: fullUser.business_id, 
+                    role: fullUser.role 
+                };
+            } catch (dbErr) {
+                console.error("Failed to fetch full user details during token authentication:", dbErr);
+                return res.status(500).json({
+                    error: 'Authentication Error',
+                    message: 'Failed to verify user details.'
+                });
+            }
+
+
             // Set business context for database queries
-            if (user.businessId) {
+            if (req.user.businessId) {
                 try {
                     await this.db.query('SELECT set_config($1, $2, true)', 
-                        ['app.current_business_id', user.businessId]);
+                        ['app.current_business_id', req.user.businessId]);
                 } catch (error) {
                     console.error('Error setting business context:', error);
                 }
@@ -1490,6 +1594,24 @@ class ModernBackendServer {
             
             next();
         });
+    }
+
+    checkTenantActiveStatus(req, res, next) {
+        // Superadmin bypasses tenant active status check
+        if (req.user && req.user.role === 'superadmin') {
+            return next();
+        }
+        
+        // Only apply for authenticated users who are tied to a business and if their business is inactive
+        // `is_active` is fetched from the database in `authenticateToken` and added to `req.user`
+        if (req.user && req.user.businessId && req.user.is_active === false) {
+            return res.status(403).json({
+                error: 'Subscription Inactive',
+                message: 'Your business subscription is currently inactive. Please contact support to reactivate your services.',
+                requestId: req.context?.requestId
+            });
+        }
+        next();
     }
 
     requireAdminRole(req, res, next) {
@@ -1502,12 +1624,22 @@ class ModernBackendServer {
         next();
     }
 
+    requireSuperAdminRole(req, res, next) {
+        if (!req.user || req.user.role !== 'superadmin') {
+            return res.status(403).json({
+                error: 'Insufficient Permissions',
+                message: 'SuperAdmin role required for this operation'
+            });
+        }
+        next();
+    }
+
     // Authentication handlers
     async handleLogin(req, res) {
         try {
             const { email, password, rememberMe } = req.body;
 
-            // Demo credentials check
+            // Demo credentials check (can be expanded to pull from DB)
             if (email === 'demo@example.com') {
                 const demoUser = await this.createDemoUserResponse();
                 return res.json(demoUser);
@@ -1515,10 +1647,10 @@ class ModernBackendServer {
 
             // Regular user authentication
             const userResult = await this.db.query(`
-                SELECT u.*, b.name as business_name, b.subdomain, b.plan 
+                SELECT u.*, b.name as business_name, b.subdomain, b.plan, b.is_active as business_is_active, b.next_billing_date, b.warning_sent
                 FROM users u 
                 LEFT JOIN businesses b ON u.business_id = b.id 
-                WHERE u.email = ? AND u.is_active = true
+                WHERE u.email = $1 AND u.is_active = true
             `, [email]);
 
             if (userResult.rows.length === 0) {
@@ -1544,12 +1676,12 @@ class ModernBackendServer {
 
             // Update last login
             await this.db.query(
-                'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+                'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
                 [user.id]
             );
 
             // Log audit event
-            await this.logAuditEvent(user.business_id, user.id, 'login', 'users', user.id, null, null, req.context);
+            await this.logAuditEvent(user.business_id, user.id, 'login', 'users', user.id, null, user, req.context);
 
             res.json({
                 accessToken,
@@ -1564,6 +1696,9 @@ class ModernBackendServer {
                     businessName: user.business_name,
                     businessSubdomain: user.subdomain,
                     businessPlan: user.plan,
+                    businessIsActive: user.business_is_active, 
+                    nextBillingDate: user.next_billing_date, 
+                    warningSent: user.warning_sent, 
                     permissions: user.permissions || []
                 },
                 message: 'Login successful'
@@ -1579,23 +1714,32 @@ class ModernBackendServer {
     }
 
     async createDemoUserResponse() {
-        // Get first business for demo
-        const businessResult = await this.db.query(
-            'SELECT * FROM businesses WHERE status = ? ORDER BY created_at LIMIT 1',
-            ['active']
+        // Find the 'Demo Biznes' tenant ID
+        const demoBusinessResult = await this.db.query(
+            "SELECT id, name, subdomain, plan, is_active, next_billing_date, warning_sent FROM businesses WHERE name = 'Demo Biznes' LIMIT 1"
         );
 
-        if (businessResult.rows.length === 0) {
-            throw new Error('No active businesses found');
+        let business;
+        if (demoBusinessResult.rows.length > 0) {
+            business = demoBusinessResult.rows[0];
+        } else {
+            // Fallback: if 'Demo Biznes' not found, get the first active business
+            const fallbackBusinessResult = await this.db.query(
+                'SELECT id, name, subdomain, plan, is_active, next_billing_date, warning_sent FROM businesses WHERE is_active = TRUE ORDER BY created_at LIMIT 1',
+            );
+            if (fallbackBusinessResult.rows.length === 0) {
+                 throw new Error('No active businesses found for demo user.');
+            }
+            business = fallbackBusinessResult.rows[0];
         }
 
-        const business = businessResult.rows[0];
         const demoUser = {
-            id: 'demo-user-id',
+            id: 'demo-user-id', 
             businessId: business.id,
             email: 'demo@example.com',
-            role: 'admin',
-            permissions: ['all']
+            role: 'admin', 
+            permissions: ['all'],
+            is_active: business.is_active 
         };
 
         const accessToken = this.generateAccessToken(demoUser);
@@ -1612,6 +1756,9 @@ class ModernBackendServer {
                 businessName: business.name,
                 businessSubdomain: business.subdomain,
                 businessPlan: business.plan,
+                businessIsActive: business.is_active, 
+                nextBillingDate: business.next_billing_date, 
+                warningSent: business.warning_sent, 
                 permissions: ['all']
             },
             message: 'Demo login successful'
@@ -1625,7 +1772,8 @@ class ModernBackendServer {
                 businessId: user.business_id || user.businessId,
                 email: user.email, 
                 role: user.role,
-                permissions: user.permissions || []
+                permissions: user.permissions || [],
+                is_active: user.is_active 
             },
             SECURITY_CONFIG.jwt.secret,
             { expiresIn: SECURITY_CONFIG.jwt.accessTokenExpiry }
@@ -1640,10 +1788,10 @@ class ModernBackendServer {
         );
 
         const tokenHash = await bcrypt.hash(refreshToken, 10);
-        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); 
 
         await this.db.query(
-            'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+            'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
             [userId, tokenHash, expiresAt]
         );
 
@@ -1652,7 +1800,50 @@ class ModernBackendServer {
 
     // Additional handler methods (shortened for brevity)
     async handleRegister(req, res) {
-        res.json({ message: 'Register endpoint - implementation pending' });
+        try {
+            const { businessId, email, password, firstName, lastName, role } = req.body;
+
+            // Ensure the business exists
+            const businessCheck = await this.db.query('SELECT id FROM businesses WHERE id = $1', [businessId]);
+            if (businessCheck.rows.length === 0) {
+                return res.status(404).json({ error: 'Business not found' });
+            }
+
+            // Check if user already exists
+            const existingUser = await this.db.query('SELECT id FROM users WHERE email = $1', [email]);
+            if (existingUser.rows.length > 0) {
+                return res.status(409).json({ error: 'User with this email already exists' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, SECURITY_CONFIG.bcrypt.saltRounds);
+
+            const result = await this.db.query(`
+                INSERT INTO users (business_id, email, password_hash, first_name, last_name, role)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, email, first_name, last_name, role, business_id
+            `, [businessId, email, hashedPassword, firstName, lastName, role]);
+
+            const newUser = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(businessId, newUser.id, 'register', 'users', newUser.id, null, newUser, req.context);
+
+            res.status(201).json({
+                message: 'User registered successfully',
+                user: {
+                    id: newUser.id,
+                    email: newUser.email,
+                    firstName: newUser.first_name,
+                    lastName: newUser.last_name,
+                    role: newUser.role,
+                    businessId: newUser.business_id
+                }
+            });
+
+        } catch (error) {
+            console.error('Registration error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async handleRefreshToken(req, res) {
@@ -1678,304 +1869,344 @@ class ModernBackendServer {
     }
 
     async createBusiness(req, res) {
-        res.json({ message: 'Create business endpoint - implementation pending' });
+        try {
+            const { name, domain, subdomain, plan, type, description } = req.body;
+            const nextBillingDate = new Date();
+            nextBillingDate.setDate(nextBillingDate.getDate() + 30); 
+
+            const result = await this.db.query(`
+                INSERT INTO businesses (name, domain, subdomain, plan, settings, next_billing_date, is_active)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id, name, domain, subdomain, plan, next_billing_date, is_active
+            `, [name, domain, subdomain, plan, JSON.stringify({ type, description }), nextBillingDate.toISOString().split('T')[0], true]);
+
+            const newBusiness = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(newBusiness.id, req.user?.id, 'create_business', 'businesses', newBusiness.id, null, newBusiness, req.context);
+
+            res.status(201).json({
+                message: 'Business created successfully',
+                business: newBusiness
+            });
+        } catch (error) {
+            console.error('Create business error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getBusiness(req, res) {
-        res.json({ message: 'Get business endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+            const result = await this.db.query('SELECT * FROM businesses WHERE id = $1', [id]);
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Business not found' });
+            }
+            res.json({ business: result.rows[0] });
+        } catch (error) {
+            console.error('Get business error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async updateBusiness(req, res) {
-        res.json({ message: 'Update business endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+            const { name, domain, subdomain, plan, settings, next_billing_date, is_active } = req.body;
+
+            const result = await this.db.query(`
+                UPDATE businesses SET name = $1, domain = $2, subdomain = $3, plan = $4, settings = $5, next_billing_date = $6, is_active = $7
+                WHERE id = $8
+                RETURNING id, name, domain, subdomain, plan, settings, next_billing_date, is_active
+            `, [name, domain, subdomain, plan, JSON.stringify(settings), next_billing_date, is_active, id]);
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Business not found' });
+            }
+
+            const updatedBusiness = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(id, req.user?.id, 'update_business', 'businesses', id, null, updatedBusiness, req.context);
+
+            res.json({
+                message: 'Business updated successfully',
+                business: updatedBusiness
+            });
+        } catch (error) {
+            console.error('Update business error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async deleteBusiness(req, res) {
-        res.json({ message: 'Delete business endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+
+            // Log audit event
+            await this.logAuditEvent(id, req.user?.id, 'delete_business', 'businesses', id, null, null, req.context);
+
+            await this.db.query('DELETE FROM businesses WHERE id = $1', [id]);
+
+            res.status(200).json({ message: 'Business deleted successfully' });
+        } catch (error) {
+            console.error('Delete business error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getUsers(req, res) {
-        res.json({ message: 'Get users endpoint - implementation pending' });
+        try {
+            const result = await this.db.query('SELECT * FROM users WHERE business_id = $1 ORDER BY created_at DESC', [req.user.businessId]);
+            res.json({ users: result.rows });
+        } catch (error) {
+            console.error('Get users error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async createUser(req, res) {
-        res.json({ message: 'Create user endpoint - implementation pending' });
+        try {
+            const { email, password, firstName, lastName, role, permissions, businessId } = req.body;
+
+            // Check if user already exists
+            const existingUser = await this.db.query('SELECT id FROM users WHERE email = $1', [email]);
+            if (existingUser.rows.length > 0) {
+                return res.status(409).json({ error: 'User with this email already exists' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, SECURITY_CONFIG.bcrypt.saltRounds);
+
+            const result = await this.db.query(`
+                INSERT INTO users (business_id, email, password_hash, first_name, last_name, role, permissions)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id, email, first_name, last_name, role, business_id
+            `, [businessId, email, hashedPassword, firstName, lastName, role, JSON.stringify(permissions)]);
+
+            const newUser = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(businessId, req.user?.id, 'create_user', 'users', newUser.id, null, newUser, req.context);
+
+            res.status(201).json({
+                message: 'User created successfully',
+                user: {
+                    id: newUser.id,
+                    email: newUser.email,
+                    firstName: newUser.first_name,
+                    lastName: newUser.last_name,
+                    role: newUser.role,
+                    businessId: newUser.business_id
+                }
+            });
+
+        } catch (error) {
+            console.error('Create user error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getUser(req, res) {
-        res.json({ message: 'Get user endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+            const result = await this.db.query('SELECT * FROM users WHERE id = $1', [id]);
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+            res.json({ user: result.rows[0] });
+        } catch (error) {
+            console.error('Get user error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async updateUser(req, res) {
-        res.json({ message: 'Update user endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+            const { email, firstName, lastName, role, permissions } = req.body;
+
+            const result = await this.db.query(`
+                UPDATE users SET email = $1, first_name = $2, last_name = $3, role = $4, permissions = $5
+                WHERE id = $6
+                RETURNING id, email, first_name, last_name, role, business_id
+            `, [email, firstName, lastName, role, JSON.stringify(permissions), id]);
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const updatedUser = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'update_user', 'users', id, null, updatedUser, req.context);
+
+            res.json({
+                message: 'User updated successfully',
+                user: updatedUser
+            });
+        } catch (error) {
+            console.error('Update user error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async deleteUser(req, res) {
-        res.json({ message: 'Delete user endpoint - implementation pending' });
+        try {
+            const { id } = req.params;
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'delete_user', 'users', id, null, null, req.context);
+
+            await this.db.query('DELETE FROM users WHERE id = $1', [id]);
+
+            res.status(200).json({ message: 'User deleted successfully' });
+        } catch (error) {
+            console.error('Delete user error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getChartOfAccounts(req, res) {
-        res.json({ message: 'Get chart of accounts endpoint - implementation pending' });
+        try {
+            const result = await this.db.query('SELECT * FROM chart_of_accounts WHERE business_id = $1 ORDER BY code', [req.user.businessId]);
+            res.json({ chartOfAccounts: result.rows });
+        } catch (error) {
+            console.error('Get chart of accounts error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async createAccount(req, res) {
-        res.json({ message: 'Create account endpoint - implementation pending' });
+        try {
+            const { code, name, accountType, parentId, balance, currency } = req.body;
+
+            const result = await this.db.query(`
+                INSERT INTO chart_of_accounts (business_id, code, name, account_type, parent_id, balance, currency)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id, code, name, account_type, parent_id, balance, currency
+            `, [req.user.businessId, code, name, accountType, parentId, balance, currency]);
+
+            const newAccount = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'create_account', 'chart_of_accounts', newAccount.id, null, newAccount, req.context);
+
+            res.status(201).json({
+                message: 'Account created successfully',
+                account: newAccount
+            });
+        } catch (error) {
+            console.error('Create account error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getJournalEntries(req, res) {
-        res.json({ message: 'Get journal entries endpoint - implementation pending' });
+        try {
+            const result = await this.db.query('SELECT * FROM journal_entries WHERE business_id = $1 ORDER BY date', [req.user.businessId]);
+            res.json({ journalEntries: result.rows });
+        } catch (error) {
+            console.error('Get journal entries error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async createJournalEntry(req, res) {
-        res.json({ message: 'Create journal entry endpoint - implementation pending' });
+        try {
+            const { date, description, reference, entries } = req.body;
+
+            const result = await this.db.query(`
+                INSERT INTO journal_entries (business_id, date, description, reference)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, date, description, reference
+            `, [req.user.businessId, date, description, reference]);
+
+            const newJournalEntry = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'create_journal_entry', 'journal_entries', newJournalEntry.id, null, newJournalEntry, req.context);
+
+            res.status(201).json({
+                message: 'Journal entry created successfully',
+                journalEntry: newJournalEntry
+            });
+        } catch (error) {
+            console.error('Create journal entry error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getProducts(req, res) {
         try {
-            const { businessId } = req.user;
-            const result = await this.db.query(
-                'SELECT * FROM products WHERE business_id = ? AND is_active = true ORDER BY name',
-                [businessId]
-            );
+            const result = await this.db.query('SELECT * FROM products WHERE business_id = $1 ORDER BY name', [req.user.businessId]);
             res.json({ products: result.rows });
         } catch (error) {
             console.error('Get products error:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
         }
     }
 
     async createProduct(req, res) {
-        res.json({ message: 'Create product endpoint - implementation pending' });
+        try {
+            const { name, description, sku, barcode, price, cost, quantity, minQuantity, category, unit, taxRate } = req.body;
+
+            const result = await this.db.query(`
+                INSERT INTO products (business_id, name, description, sku, barcode, price, cost, quantity, min_quantity, category, unit, tax_rate)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                RETURNING id, name, description, sku, barcode, price, cost, quantity, min_quantity, category, unit, tax_rate
+            `, [req.user.businessId, name, description, sku, barcode, price, cost, quantity, minQuantity, category, unit, taxRate]);
+
+            const newProduct = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'create_product', 'products', newProduct.id, null, newProduct, req.context);
+
+            res.status(201).json({
+                message: 'Product created successfully',
+                product: newProduct
+            });
+        } catch (error) {
+            console.error('Create product error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getSales(req, res) {
         try {
-            const { businessId } = req.user;
-            const result = await this.db.query(
-                'SELECT * FROM sales WHERE business_id = ? ORDER BY created_at DESC LIMIT 50',
-                [businessId]
-            );
+            const result = await this.db.query('SELECT * FROM sales WHERE business_id = $1 ORDER BY created_at DESC', [req.user.businessId]);
             res.json({ sales: result.rows });
         } catch (error) {
             console.error('Get sales error:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
         }
     }
 
     async createSale(req, res) {
-        res.json({ message: 'Create sale endpoint - implementation pending' });
+        try {
+            const { customerId, items, paymentMethod, notes } = req.body;
+
+            const result = await this.db.query(`
+                INSERT INTO sales (business_id, user_id, sale_number, total_amount, tax_amount, discount_amount, payment_method, payment_status, notes)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                RETURNING id, sale_number, total_amount, tax_amount, discount_amount, payment_method, payment_status, notes
+            `, [req.user.businessId, req.user.id, 'Sale-' + Date.now(), 0, 0, 0, paymentMethod, 'completed', notes]);
+
+            const newSale = result.rows[0];
+
+            // Log audit event
+            await this.logAuditEvent(req.user.businessId, req.user.id, 'create_sale', 'sales', newSale.id, null, newSale, req.context);
+
+            res.status(201).json({
+                message: 'Sale created successfully',
+                sale: newSale
+            });
+        } catch (error) {
+            console.error('Create sale error:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
     }
 
     async getDashboardReports(req, res) {
-        try {
-            const { businessId } = req.user;
-            
-            const stats = await this.db.query(`
-                SELECT 
-                    COUNT(DISTINCT s.id) as total_sales,
-                    COALESCE(SUM(s.total_amount), 0) as total_revenue,
-                    COUNT(DISTINCT p.id) as total_products,
-                    COUNT(DISTINCT u.id) as total_users
-                FROM sales s
-                FULL OUTER JOIN products p ON s.business_id = p.business_id
-                FULL OUTER JOIN users u ON s.business_id = u.business_id
-                WHERE s.business_id = ? OR p.business_id = ? OR u.business_id = ?
-            `, [businessId, businessId, businessId]);
-
-            res.json({
-                dashboard: stats.rows[0],
-                timestamp: new Date().toISOString()
-            });
-        } catch (error) {
-            console.error('Dashboard reports error:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
-
-    async getFinancialReports(req, res) {
-        res.json({ message: 'Financial reports endpoint - implementation pending' });
-    }
-
-    async getSalesReports(req, res) {
-        res.json({ message: 'Sales reports endpoint - implementation pending' });
-    }
-
-    async getTelegramConfig(req, res) {
-        res.json({ message: 'Telegram config endpoint - implementation pending' });
-    }
-
-    async updateTelegramConfig(req, res) {
-        res.json({ message: 'Update Telegram config endpoint - implementation pending' });
-    }
-
-    async connectWhatsApp(req, res) {
-        try {
-            // If already connected, return status
-            if (this.whatsappConnected && this.whatsappClient) {
-                return res.json({
-                    success: true,
-                    message: 'WhatsApp already connected',
-                    connected: true,
-                    qrCode: null
-                });
-            }
-
-            // Reset broadcast flags
-            this.qrCodeBroadcasted = false;
-            this.connectionBroadcasted = false;
-            this.authFailureBroadcasted = false;
-            this.disconnectionBroadcasted = false;
-
-            // Initialize new WhatsApp client (this will cleanup existing client)
-            this.setupWhatsAppBot();
-
-            // Return current status
-            res.json({
-                success: true,
-                message: 'WhatsApp connection initiated. Check console for QR code or wait for WebSocket updates.',
-                connected: this.whatsappConnected,
-                qrCode: this.whatsappQRCode,
-                instructions: 'QR kod əldə etmək üçün bir neçə saniyə gözləyin və ya konsolu yoxlayın.'
-            });
-
-        } catch (error) {
-            console.error('WhatsApp connect error:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to initiate WhatsApp connection',
-                message: error.message
-            });
-        }
-    }
-
-    async disconnectWhatsApp(req, res) {
-        try {
-            if (this.whatsappClient) {
-                this.whatsappClient.removeAllListeners();
-                await this.whatsappClient.destroy();
-                this.whatsappClient = null;
-                this.whatsappConnected = false;
-                this.whatsappQRCode = null;
-                this.qrCodeBroadcasted = false;
-                this.connectionBroadcasted = false;
-                this.authFailureBroadcasted = false;
-                this.disconnectionBroadcasted = false;
-                console.log('✅ WhatsApp client disconnected and destroyed');
-                
-                // Broadcast disconnection (only once)
-                if (!this.disconnectionBroadcasted) {
-                    this.disconnectionBroadcasted = true;
-                    this.broadcastToClients({
-                        type: 'whatsapp_disconnected',
-                        message: 'WhatsApp bağlantısı kəsildi'
-                    });
-                }
-            }
-
-            res.json({
-                success: true,
-                message: 'WhatsApp disconnected successfully',
-                connected: false
-            });
-        } catch (error) {
-            console.error('WhatsApp disconnect error:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to disconnect WhatsApp',
-                message: error.message
-            });
-        }
-    }
-
-    async getWhatsAppSettings(req, res) {
-        try {
-            // Get current WhatsApp status and settings
-            const settings = {
-                connected: this.whatsappConnected || false,
-                qrCode: this.whatsappQRCode || null,
-                botName: 'MühasibatlıqPro Bot',
-                welcomeMessage: 'Salam, MühasibatlıqPro xidmətinə xoş gəldiniz!',
-                notifications: {
-                    newSales: true,
-                    lowStock: true,
-                    dailyReport: true
-                },
-                autoReplies: [
-                    {
-                        command: '!salam',
-                        response: 'Salam! MühasibatlıqPro WhatsApp botuna xoş gəldiniz!'
-                    },
-                    {
-                        command: '!anbar',
-                        response: 'Anbar məlumatı yüklənir...'
-                    },
-                    {
-                        command: '!help',
-                        response: 'Kömək məlumatları'
-                    },
-                    {
-                        command: '!status',
-                        response: 'Sistem statusu'
-                    }
-                ],
-                lastUpdate: new Date().toISOString()
-            };
-
-            res.json(settings);
-        } catch (error) {
-            console.error('Get WhatsApp settings error:', error);
-            res.status(500).json({ 
-                error: 'Internal Server Error',
-                message: error.message
-            });
-        }
-    }
-
-    async saveWhatsAppSettings(req, res) {
-        try {
-            const settings = req.body;
-            
-            // Here you would save settings to database in a real implementation
-            // For now, just validate and return success
-            
-            if (settings.botName) {
-                console.log('Bot name updated:', settings.botName);
-            }
-            
-            if (settings.welcomeMessage) {
-                console.log('Welcome message updated:', settings.welcomeMessage);
-            }
-            
-            console.log('WhatsApp settings saved:', {
-                botName: settings.botName,
-                welcomeMessage: settings.welcomeMessage,
-                notifications: settings.notifications
-            });
-
-            res.json({
-                success: true,
-                message: 'WhatsApp settings saved successfully',
-                settings: settings,
-                timestamp: new Date().toISOString()
-            });
-        } catch (error) {
-            console.error('Save WhatsApp settings error:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to save WhatsApp settings',
-                message: error.message
-            });
-        }
-    }
-
-    async handleTelegramWebhook(req, res) {
-        res.json({ message: 'Telegram webhook endpoint - implementation pending' });
-    }
-
-    async getAuditLogs(req, res) {
-        res.json({ message: 'Audit logs endpoint - implementation pending' });
-    }
-
-    async getSystemStats(req, res) {
         try {
             const stats = {
                 server: {
@@ -1996,7 +2227,219 @@ class ModernBackendServer {
             res.json({ stats });
         } catch (error) {
             console.error('System stats error:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
+    }
+
+    async logFrontendError(req, res) {
+        try {
+            const { type, message, stack, source, lineno, colno, url, method, level, metadata } = req.body;
+            await this.logErrorToDatabase({
+                type,
+                message,
+                stack,
+                source,
+                lineno,
+                colno,
+                url,
+                method,
+                level,
+                ip: req.context?.ip,
+                userAgent: req.context?.userAgent,
+                metadata
+            });
+            console.log(`Logged frontend error: ${type} - ${message}`);
+            
+            const telegramMessage = `🚨 Frontend Xətası [${this.isProduction ? 'PROD' : 'DEV'}]:\n` +
+                                  `Mesaj: ${message}\n` +
+                                  `URL: ${url}\n` +
+                                  (lineno && colno ? `Sətr: ${lineno}:${colno}\n` : '') +
+                                  `Stack: \`\`\`${stack ? stack.substring(0, 500) : 'N/A'}\`\`\``; 
+            this.sendTelegramNotification(telegramMessage);
+
+            res.status(200).json({ success: true, message: 'Error logged successfully' });
+        } catch (error) {
+            console.error('Failed to log frontend error:', error);
+            res.status(500).json({ success: false, message: 'Failed to log error' });
+        }
+    }
+
+    async logPerformanceMetric(req, res) {
+        try {
+            const { type, loadTime, url, metadata, level } = req.body;
+            await this.logErrorToDatabase({
+                type,
+                message: `Page load time: ${loadTime}ms`,
+                url,
+                level: level || (loadTime > 3000 ? 'warning' : 'info'), 
+                metadata: { ...metadata, loadTime },
+                ip: req.context?.ip,
+                userAgent: req.context?.userAgent
+            });
+            console.log(`Logged performance metric: ${type} - ${loadTime}ms`);
+            
+            if (loadTime > 5000) { 
+                const telegramMessage = `🐌 Performans Xəbərdarlığı [${this.isProduction ? 'PROD' : 'DEV'}]:\nTip: ${type}\nYüklənmə Vaxtı: ${loadTime}ms\nURL: ${url}\nVaxt: ${new Date().toLocaleString('az-AZ')}`;
+                this.sendTelegramNotification(telegramMessage);
+            }
+
+            res.status(200).json({ success: true, message: 'Performance metric logged successfully' });
+        } catch (error) {
+            console.error('Failed to log performance metric:', error);
+            res.status(500).json({ success: false, message: 'Failed to log performance metric' });
+        }
+    }
+
+    async logErrorToDatabase({ type, message, stack, source, lineno, colno, url, method, ip, userAgent, level, metadata }) {
+        try {
+            const query = `
+                INSERT INTO error_logs (type, message, stack, source, lineno, colno, url, method, level, metadata, created_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
+            `;
+            const values = [
+                type,
+                message || null,
+                stack || null,
+                source || null,
+                lineno || null,
+                colno || null,
+                url || null,
+                method || null,
+                level || 'error',
+                JSON.stringify({ ip, userAgent, ...metadata })
+            ];
+            await this.db.query(query, values);
+            console.log(`Database Logged: ${type} - ${message}`);
+        } catch (dbError) {
+            console.error('CRITICAL: Failed to log error to database:', dbError);
+        }
+    }
+
+    async sendTelegramNotification(text) {
+        if (!this.telegramBot || !process.env.TELEGRAM_CHAT_ID) {
+            console.warn('Telegram bot or chat ID not configured for global notifications. Cannot send Telegram notification.');
+            return;
+        }
+
+        try {
+            await this.telegramBot.sendMessage(process.env.TELEGRAM_CHAT_ID, text, {
+                parse_mode: 'Markdown'
+            });
+            console.log('Global Telegram notification sent successfully.');
+        } catch (error) {
+            console.error('Failed to send global Telegram notification:', error.message);
+        }
+    }
+    
+    // New function for tenant-specific Telegram notifications
+    async sendTenantTelegramNotification(businessId, message, notificationType = 'general') {
+        try {
+            const { rows } = await this.db.query(
+                'SELECT telegram_chat_id, telegram_notifications_enabled, telegram_notification_types FROM businesses WHERE id = $1',
+                [businessId]
+            );
+
+            if (rows.length === 0) {
+                console.warn(`Tenant ${businessId} not found for Telegram notification.`);
+                return;
+            }
+
+            const tenant = rows[0];
+
+            if (!tenant.telegram_notifications_enabled || !tenant.telegram_chat_id) {
+                console.log(`Telegram notifications disabled or chat ID missing for tenant ${businessId}.`);
+                return;
+            }
+
+            if (Array.isArray(tenant.telegram_notification_types) && !tenant.telegram_notification_types.includes(notificationType)) {
+                console.log(`Notification type "${notificationType}" not enabled for tenant ${businessId}.`);
+                return;
+            }
+            
+            if (!this.telegramBot) {
+                console.warn('Telegram bot not initialized on backend. Cannot send tenant notification.');
+                return;
+            }
+
+            await this.telegramBot.sendMessage(tenant.telegram_chat_id, message, {
+                parse_mode: 'Markdown'
+            });
+            console.log(`Tenant Telegram notification sent successfully to ${tenant.telegram_chat_id} for type ${notificationType}.`);
+
+        } catch (error) {
+            console.error(`Failed to send tenant Telegram notification for business ${businessId}:`, error.message);
+        }
+    }
+
+    async getTenantTelegramSettings(req, res) {
+        try {
+            const { businessId } = req.params;
+            if (req.user.role !== 'superadmin' && req.user.businessId !== businessId) {
+                 return res.status(403).json({ error: 'Insufficient Permissions', message: 'You can only access your own business settings.' });
+            }
+
+            const result = await this.db.query(
+                'SELECT telegram_chat_id, telegram_notifications_enabled, telegram_notification_types FROM businesses WHERE id = $1',
+                [businessId]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Business not found' });
+            }
+
+            res.json(result.rows[0]);
+        } catch (error) {
+            console.error('Error fetching tenant Telegram settings:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
+    }
+
+    async updateTenantTelegramSettings(req, res) {
+        try {
+            const { businessId } = req.params;
+            const { telegramChatId, telegramNotificationsEnabled, telegramNotificationTypes } = req.body;
+
+            if (req.user.role !== 'superadmin' && req.user.businessId !== businessId) {
+                return res.status(403).json({ error: 'Insufficient Permissions', message: 'You can only update your own business settings.' });
+            }
+
+            const result = await this.db.query(
+                `UPDATE businesses SET 
+                    telegram_chat_id = $1, 
+                    telegram_notifications_enabled = $2, 
+                    telegram_notification_types = $3,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $4
+                RETURNING telegram_chat_id, telegram_notifications_enabled, telegram_notification_types`,
+                [telegramChatId, telegramNotificationsEnabled, JSON.stringify(telegramNotificationTypes), businessId]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Business not found' });
+            }
+
+            res.json({ message: 'Tenant Telegram settings updated successfully', settings: result.rows[0] });
+        } catch (error) {
+            console.error('Error updating tenant Telegram settings:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
+        }
+    }
+
+    async getGlobalTelegramSettings(req, res) {
+        try {
+            const tokenExists = !!process.env.TELEGRAM_BOT_TOKEN;
+            const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || 'N/A';
+            const adminChatId = process.env.TELEGRAM_CHAT_ID || 'N/A';
+
+            res.json({
+                botToken: tokenExists ? '********************' : 'Yoxdur', // Mask token
+                webhookUrl: webhookUrl,
+                adminChatId: adminChatId,
+                status: this.telegramBot ? 'Online' : 'Offline (Token yoxdur)'
+            });
+        } catch (error) {
+            console.error('Error fetching global Telegram settings:', error);
+            res.status(500).json({ error: 'Internal Server Error', requestId: req.context.requestId });
         }
     }
 
@@ -2021,7 +2464,7 @@ class ModernBackendServer {
                 ws.send(JSON.stringify({ 
                     type: 'unknown', 
                     message: 'Unknown message type' 
-                }));
+                 }));
         }
     }
 
@@ -2029,7 +2472,7 @@ class ModernBackendServer {
         try {
             await this.db.query(`
                 INSERT INTO audit_logs (business_id, user_id, action, resource_type, resource_id, old_data, new_data, metadata, ip_address, user_agent)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             `, [
                 businessId, 
                 userId, 
@@ -2049,6 +2492,116 @@ class ModernBackendServer {
 
     generateRequestId() {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+
+    startBillingScheduler() {
+        // Clear any existing scheduler to prevent duplicates on hot reload or reinitialization
+        if (this.billingSchedulerInterval) {
+            clearInterval(this.billingSchedulerInterval);
+            clearTimeout(this.billingSchedulerInterval); 
+            console.log('Previous billing scheduler cleared.');
+        }
+
+        const runBillingCheck = async () => {
+            console.log('Running daily billing check...');
+            await this.checkBillingStatus();
+        };
+
+        // Calculate time until next midnight
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0); 
+
+        const initialDelay = midnight.getTime() - now.getTime();
+
+        // If server starts very close to midnight, run check immediately and then schedule daily from next day
+        if (initialDelay < 5 * 60 * 1000) { 
+            console.log(`Scheduling immediate billing check due to close proximity to midnight (${initialDelay / 1000}s remaining).`);
+            runBillingCheck(); 
+            // Schedule for subsequent midnights (from the day after 'this' midnight)
+            this.billingSchedulerInterval = setInterval(runBillingCheck, 24 * 60 * 60 * 1000);
+        } else {
+            // Schedule the first run for the upcoming midnight
+            console.log(`Scheduling first billing check in ${initialDelay / 1000 / 60} minutes.`);
+            this.billingSchedulerInterval = setTimeout(() => {
+                runBillingCheck(); 
+                // After the first run, set up a daily interval for subsequent midnights
+                this.billingSchedulerInterval = setInterval(runBillingCheck, 24 * 60 * 60 * 1000);
+            }, initialDelay);
+        }
+    }
+
+    async checkBillingStatus() {
+        try {
+            const { rows: tenants } = await this.db.query('SELECT id, name, email, next_billing_date, is_active, warning_sent FROM businesses');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+
+            console.log(`Starting billing status check for ${tenants.length} tenants on ${today.toLocaleDateString()}`);
+
+            for (const tenant of tenants) {
+                if (!tenant.next_billing_date) {
+                    console.warn(`Tenant ${tenant.name} has no next_billing_date, skipping billing check for this tenant.`);
+                    continue;
+                }
+
+                const nextBillingDate = new Date(tenant.next_billing_date);
+                nextBillingDate.setHours(0, 0, 0, 0); 
+
+                const diffTime = nextBillingDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let newIsActive = tenant.is_active;
+                let newWarningSent = tenant.warning_sent;
+                let updateNeeded = false;
+
+                // Scenario 1: Billing date is within 3 days and warning not sent yet
+                if (diffDays > 0 && diffDays <= 3 && !tenant.warning_sent) {
+                    const message = `🔔 Diqqət: *${tenant.name}* biznes hesabının ödəniş tarixi *${nextBillingDate.toLocaleDateString('az-AZ')}* tarixindədir. Xidmətin dayandırılmaması üçün vaxtında ödəniş etməyinizi xahiş edirik.`;
+                    console.log(`Sending billing warning for ${tenant.name}. Days left: ${diffDays}`);
+                    this.sendTelegramNotification(message);
+                    if (tenant.email) {
+                        this.sendEmailNotification(tenant.email, "MühasibatlıqPro - Ödəniş Xatırlatması", `Sayın ${tenant.name},\n\nsisteminizin ödəniş tarixi ${nextBillingDate.toLocaleDateString('az-AZ')} olaraq müəyyən edilib. Xidmətin dayandırılmaması üçün vaxtında ödəniş etməyinizi xahiş edirik.\n\nHörmətlə,\nMühasibatlıqPro Komandası`);
+                    }
+                    newWarningSent = true;
+                    updateNeeded = true;
+                } 
+                // Scenario 2: Billing date is in the past and tenant is still active
+                else if (diffDays < 0 && tenant.is_active) {
+                    const message = `🚨 Diqqət: *${tenant.name}* biznes hesabının ödəniş vaxtı keçib. Xidmət deaktiv edilir.`;
+                    console.log(`Deactivating tenant ${tenant.name} due to overdue payment.`);
+                    this.sendTelegramNotification(message);
+                    if (tenant.email) {
+                        this.sendEmailNotification(tenant.email, "MühasibatlıqPro - Xidmət Deaktiv Edildi", `Sayın ${tenant.name},\n\nödəniş vaxtı keçdiyi üçün MühasibatlıqPro xidmətiniz deaktiv edilmişdir. Xidmətlərdən yenidən istifadə etmək üçün ödənişinizi tamamlamağınızı xahiş edirik.\n\nHörmətlə,\nMühasibatlıqPro Komandası`);
+                    }
+                    newIsActive = false;
+                    newWarningSent = true; 
+                    updateNeeded = true;
+                }
+                // Scenario 3: Tenant was inactive but payment was confirmed (manual action, not handled by this loop)
+                // This scenario would typically be handled via an admin action or a payment webhook
+                // If a payment is confirmed, is_active should be set to true and warning_sent to false,
+                // and next_billing_date updated. This check below would ensure old warnings are reset if
+                // a tenant becomes active and next_billing_date is properly updated.
+                else if (diffDays >= 0 && tenant.is_active && tenant.warning_sent) {
+                    // This implies payment was made and next_billing_date was updated manually
+                    // or by another process. Reset warning_sent.
+                    newWarningSent = false;
+                    updateNeeded = true;
+                }
+
+                if (updateNeeded) {
+                    await this.db.query(`
+                        UPDATE businesses SET is_active = $1, warning_sent = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3
+                    `, [newIsActive, newWarningSent, tenant.id]);
+                    console.log(`Updated tenant ${tenant.name}: is_active=${newIsActive}, warning_sent=${newWarningSent}`);
+                }
+            }
+            console.log('Daily billing check completed.');
+        } catch (error) {
+            console.error('❌ Error during daily billing check:', error);
+            this.sendTelegramNotification(`🔥 KRİTİK XƏTA: Billing skan zamanı xəta baş verdi:\n${error.message}`);
+        }
     }
 
     start() {
@@ -2081,6 +2634,14 @@ class ModernBackendServer {
         // Handle uncaught exceptions
         process.on('uncaughtException', (err) => {
             console.error('Uncaught Exception:', err);
+            // Log to database and send alert for critical unhandled exceptions
+            this.logErrorToDatabase({
+                type: 'server_uncaught_exception',
+                message: err.message,
+                stack: err.stack,
+                level: 'critical'
+            });
+            this.sendTelegramNotification(`🔥 KRİTİK SERVER XƏTASI [${this.isProduction ? 'PROD' : 'DEV'}]:\nMesaj: ${err.message}\nStack: \`\`\`${err.stack ? err.stack.substring(0, 1000) : 'N/A'}\`\`\``); 
             if (this.isProduction) {
                 this.shutdown();
             }
@@ -2088,6 +2649,14 @@ class ModernBackendServer {
 
         process.on('unhandledRejection', (reason, promise) => {
             console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+            // Log to database and send alert for critical unhandled promise rejections
+            this.logErrorToDatabase({
+                type: 'server_unhandled_rejection',
+                message: reason instanceof Error ? reason.message : String(reason),
+                stack: reason instanceof Error ? reason.stack : null,
+                level: 'critical'
+            });
+            this.sendTelegramNotification(`🔥 KRİTİK SERVER REJECTION [${this.isProduction ? 'PROD' : 'DEV'}]:\nReason: ${reason instanceof Error ? reason.message : String(reason)}\nStack: \`\`\`${reason instanceof Error && reason.stack ? reason.stack.substring(0, 1000) : 'N/A'}\`\`\``);
             if (this.isProduction) {
                 this.shutdown();
             }
@@ -2098,6 +2667,13 @@ class ModernBackendServer {
         console.log('Shutting down server...');
         
         try {
+            // Stop billing scheduler
+            if (this.billingSchedulerInterval) {
+                clearInterval(this.billingSchedulerInterval);
+                clearTimeout(this.billingSchedulerInterval); 
+                console.log('✅ Billing scheduler stopped');
+            }
+
             // Close WhatsApp client
             if (this.whatsappClient) {
                 await this.whatsappClient.destroy();

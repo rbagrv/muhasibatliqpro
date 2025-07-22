@@ -69,9 +69,9 @@ export function getHTML() {
                             <td><span class="status-badge completed">Hazır</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-print"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'view', 'FIN-2024-001')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'download', 'FIN-2024-001')"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'print', 'FIN-2024-001')"><i class="fas fa-print"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -82,9 +82,9 @@ export function getHTML() {
                             <td><span class="status-badge completed">Hazır</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i></button>
-                                    <button class="btn btn-ghost btn-sm"><i class="fas fa-print"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'view', 'FIN-2024-002')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'download', 'FIN-2024-002')"><i class="fas fa-download"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('financial-reports', 'print', 'FIN-2024-002')"><i class="fas fa-print"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -94,4 +94,6 @@ export function getHTML() {
         </div>
     `;
 }
+
+
 

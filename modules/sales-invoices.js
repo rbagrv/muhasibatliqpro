@@ -15,7 +15,7 @@ export function getHTML() {
                         <i class="fas fa-upload"></i>
                         İmport
                     </button>
-                    <button class="btn btn-primary" onclick="app.showModuleForm('sales-invoices', 'create')">
+                    <button class="btn btn-primary" onclick="app.handleEntityOp('sales-invoices', 'create')">
                         <i class="fas fa-plus"></i>
                         Yeni Faktura
                     </button>

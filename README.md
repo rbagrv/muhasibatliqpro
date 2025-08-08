@@ -12,6 +12,7 @@ Professional accounting and consulting web application built with modern web tec
 - **Mobile**: Responsive design
 - **Error Tracking**: Global error handlers for catching JavaScript errors and unhandled promise rejections, sending them to the backend for logging.
 - **Performance Monitoring**: Measures page load times and sends metrics to the backend.
+- **Firebase Integration**: Supports Firebase for authentication (e.g., Google login, email/password). **NOTE**: The provided `index.html` includes placeholder Firebase API keys. For a live application, you **MUST** replace these with your actual Firebase project credentials from your Firebase console to enable Firebase services.
 
 ### Backend
 - **Runtime**: Node.js + Express

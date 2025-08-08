@@ -6,14 +6,16 @@
     <meta name="theme-color" content="#1e293b">
     <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="./styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
-    <script>
+    <script type="module">
         // Enable modern focus outline behavior
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Tab') {
@@ -24,10 +26,31 @@
             document.body.classList.remove('keyboard-focus');
         });
 
-        // Your web app's Firebase configuration
-        // IMPORTANT: In a production application, sensitive API keys should be loaded securely
-        // from environment variables or a backend service, not hardcoded directly in public files.
-        // For this demo, Firebase will not be initialized if no config is present.
+        // IMPORTANT: Firebase Configuration
+        // The following 'apiKey' is a placeholder. For a live application,
+        // you MUST replace these with your actual Firebase project credentials.
+        // You can find these in your Firebase project settings -> Project settings -> General -> Your apps -> Firebase SDK snippet (Config).
+        // Ensure you never expose sensitive keys publicly in production.
+        //
+        // NOTE ON FIREBASE ERRORS:
+        // If you encounter "FirebaseError: Firebase: Error (auth/firebase-app-check-token-is-invalid.)"
+        // this typically means Firebase App Check is enabled and enforced in your Firebase project.
+        //
+        // *** URGENT ACTION REQUIRED TO RESOLVE THIS ERROR FOR DEMO: ***
+        // 1. Go to your Firebase Console (console.firebase.google.com).
+        // 2. Select your project: 'muhasib-24ca4'.
+        // 3. Navigate to 'Build' -> 'App Check'.
+        // 4. Click on the 'Apps' tab (if not already there).
+        // 5. Find your web app (e.g., "Web") and click on the three dots (⋮) next to it.
+        // 6. Select 'Manage enforcement'.
+        // 7. For 'Authentication' (and any other relevant products you are using like Firestore),
+        //    change the enforcement from 'Enforced' to 'Not enforced'.
+        // 8. Save your changes.
+        //
+        // This will allow Firebase Authentication to work without an App Check token,
+        // which is suitable for development and demo purposes.
+        // For production, you should properly integrate Firebase App Check with a valid reCAPTCHA v3 site key.
+        // (e.g., initializeAppCheck(app, { provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_SITE_KEY'), isTokenAutoRefreshEnabled: true }));
         window.firebaseConfig = {
             apiKey: "AIzaSyClUkkk_6bmmUfKi2KWPr0mfbfrzskgF_8",
             authDomain: "muhasibatliqpro.firebaseapp.com",
@@ -93,8 +116,8 @@
 </head>
 <body>
     <div id="notification-container"></div>
-    <!-- Hide all landing page content -->
-    <div id="landingPage">
+    <!-- Hide all landing page content by default -->
+    <div id="landingPage" style="display: block;">
         <!-- Navigation -->
         <nav class="navbar">
             <div class="container">
@@ -111,7 +134,7 @@
                     <li><a href="#architecture" class="nav-link">Arxitektura</a></li>
                     <li><a href="#pricing" class="nav-link">Qiymətlər</a></li>
                     <li><a href="#contact" class="nav-link">Əlaqə</a></li>
-                    <li><button onclick="app.openLoginModal()" class="btn btn-primary">Demo Başlat</button></li>
+                    <li><button class="btn btn-primary" id="navLoginBtn">Demo Başlat</button></li>
                 </ul>
                 <div class="hamburger" id="hamburger">
                     <span></span>
@@ -139,11 +162,11 @@
                         Multi-tenant SaaS arxitekturası ilə professional mühasibatlıq həlli
                     </p>
                     <div class="hero-buttons">
-                        <button onclick="app.openLoginModal()" class="btn btn-primary btn-lg">
+                        <button class="btn btn-primary btn-lg" id="heroDemoBtn">
                             <i class="fas fa-play"></i>
                             Demo Başlat
                         </button>
-                        <button onclick="app.scrollToFeatures()" class="btn btn-secondary btn-lg">
+                        <button class="btn btn-secondary btn-lg" id="heroFeaturesBtn">
                             <i class="fas fa-info-circle"></i>
                             Xüsusiyyətlər
                         </button>
@@ -411,7 +434,7 @@
                         </div>
                     </div>
                     
-                    <form class="contact-form" id="contactForm" onsubmit="app.submitContactForm(event)">
+                    <form class="contact-form" id="contactForm">
                         <div class="form-group">
                             <label class="form-label">Ad və Soyad</label>
                             <input type="text" name="name" class="form-input" required>
@@ -422,7 +445,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-input" required>
+                            <input type="email" name="email" class="form-input" placeholder="e.g., user@example.com" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Mesaj</label>
@@ -458,7 +481,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>Sistemə Giriş</h3>
-                        <button type="button" onclick="app.closeLoginModal()" class="btn-close">
+                        <button type="button" class="btn-close" id="loginModalCloseBtn">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -472,7 +495,7 @@
                                 <label class="form-label">Şifrə</label>
                                 <div class="password-input-wrapper">
                                     <input type="password" name="password" id="loginPassword" class="form-input" placeholder="******" required>
-                                    <span class="password-toggle" onclick="app.togglePasswordVisibility('loginPassword')">
+                                    <span class="password-toggle">
                                         <i class="fas fa-eye"></i>
                                     </span>
                                 </div>
@@ -482,12 +505,12 @@
                                     <input type="checkbox" name="rememberMe" id="rememberMeCheckbox">
                                     Məni xatırla
                                 </label>
-                                <a href="#" class="forgot-password-link" onclick="app.forgotPassword()">Şifrəni bərpa et?</a>
+                                <a href="#" class="forgot-password-link">Şifrəni bərpa et?</a>
                             </div>
                             <div id="loginErrorMsg" class="error-message" style="display: none;"></div>
                             <div class="modal-footer">
-                                <button type="button" onclick="app.closeLoginModal()" class="btn btn-secondary">Ləğv et</button>
-                                <button type="button" onclick="app.demoLogin()" class="btn btn-secondary">
+                                <button type="button" class="btn btn-secondary" id="loginModalCancelBtn">Ləğv et</button>
+                                <button type="button" class="btn btn-secondary" id="loginDemoBtn">
                                     <i class="fas fa-user"></i> Demo Giriş
                                 </button>
                                 <button type="submit" class="btn btn-primary">
@@ -507,7 +530,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>Konsultasiya Rezervasiyası</h3>
-                        <button type="button" onclick="app.closeConsultationModal()" class="btn-close">
+                        <button type="button" class="btn-close" id="consultationModalCloseBtn">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -546,7 +569,7 @@
                                 <textarea id="consultMessage" name="consultMessage" class="textarea" placeholder="Hansı mövzularında konsultasiya almaq istəyirsiniz?"></textarea>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" onclick="app.closeConsultationModal()" class="btn btn-secondary">Ləğv et</button>
+                                <button type="button" class="btn btn-secondary" id="consultationModalCancelBtn">Ləğv et</button>
                                 <button type="submit" class="btn btn-primary">Rezervasiya Et</button>
                             </div>
                         </form>
@@ -557,9 +580,14 @@
     </div>
 
     <!-- Application Container - Show directly -->
-    <div id="appContainer" style="display: none;"></div>
+    <div id="appContainer" style="display: none;">
+        <div class="loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: var(--bg-dark-deep);">
+            <img src="./loading.svg" alt="Yüklənir..." width="100">
+            <p style="margin-top: 1rem; font-size: 1.2rem; color: var(--text-primary);">Proqram yüklənir...</p>
+        </div>
+    </div>
 
-    <!-- Mobile Menu Overlay -->
+    <!-- Mobile Menu Overlay for landing page. The app has its own: #appMobileMenuOverlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
     <!-- Confirm Import Modal (for Sales Invoices) -->
@@ -568,7 +596,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>İmportu Təsdiqlə</h3>
-                    <button type="button" onclick="app.closeConfirmImportModal()" class="btn-close">
+                    <button type="button" class="btn-close" id="confirmImportModalCloseBtn">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -627,7 +655,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" onclick="app.closeConfirmImportModal()" class="btn btn-secondary">Ləğv et</button>
+                    <button type="button" class="btn btn-secondary" id="confirmImportModalCancelBtn">Ləğv et</button>
                     <button type="button" id="confirmImportBtn" class="btn btn-primary">
                         <i class="fas fa-check"></i> Təsdiqlə
                     </button>
@@ -636,7 +664,24 @@
         </div>
     </div>
 
+    <!-- Sub-Account Details Modal -->
+    <div id="subAccountDetailsModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-content">
+                <!-- Content will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile App Menu Overlay (for app only) -->
+    <div class="mobile-menu-overlay" id="appMobileMenuOverlay"></div>
+
+    <!-- Bottom Navigation Bar (for mobile view of the app) -->
+    <nav class="bottom-nav-bar no-print" id="bottomNavBar">
+        <!-- Content injected by script.js -->
+    </nav>
+
     <!-- Module Scripts (dynamically loaded per module) -->
-    <script type="module" src="script.js"></script>
+    <script type="module" src="./script.js"></script>
 </body>
 </html>

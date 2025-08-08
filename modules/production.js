@@ -12,7 +12,7 @@ export function getHTML() {
                     <i class="fas fa-plus"></i> Yeni İstehsalat Sifarişi
                 </button>
             </div>
-            
+
             <div class="module-overview">
                 <div class="module-stats">
                     <div class="stat-card primary">
@@ -62,7 +62,7 @@ export function getHTML() {
             </div>
 
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="productionOrdersTable">
                     <thead>
                         <tr>
                             <th>Sifariş #</th>
@@ -78,7 +78,7 @@ export function getHTML() {
                             <td>PRO-2024-001</td>
                             <td>Dell Laptop</td>
                             <td>25</td>
-                            <td>10 Fev 2024</td>
+                            <td>10.02.2024</td>
                             <td><span class="badge badge-warning">Hazırlanır</span></td>
                             <td>
                                 <div class="action-buttons">
@@ -95,7 +95,7 @@ export function getHTML() {
                 <h2 class="section-title">İstehsalat & Maya Dəyəri Hesabatları</h2>
                 <div class="data-table-container">
                     <h3>İstehsal Olunmuş Məhsulların Maya Dəyəri</h3>
-                    <table class="data-table">
+                    <table class="data-table" id="productionCostTable">
                         <thead>
                             <tr>
                                 <th>Məhsul</th>
@@ -126,7 +126,7 @@ export function getHTML() {
 
                 <div class="data-table-container">
                     <h3>Xammal və Material Sərfiyyatı</h3>
-                    <table class="data-table">
+                    <table class="data-table" id="rawMaterialTable">
                         <thead>
                             <tr>
                                 <th>Material</th>
@@ -157,7 +157,7 @@ export function getHTML() {
 
                 <div class="data-table-container">
                     <h3>Standart vs Faktiki Maya Müqayisəsi</h3>
-                    <table class="data-table">
+                    <table class="data-table" id="costComparisonTable">
                         <thead>
                             <tr>
                                 <th>Məhsul</th>
@@ -195,7 +195,7 @@ export function getFormHTML(action = 'create', data = {}) {
     const isView = action === 'view';
     const isEdit = action === 'edit';
     const title = action === 'create' ? 'Yeni İstehsalat Sifarişi' : action === 'edit' ? 'İstehsalat Sifarişini Redaktə Et' : 'İstehsalat Sifarişi Məlumatları';
-    
+
     const newId = action === 'create' ? 'PRD-ORD-' + String(Date.now()).slice(-4) : data.id;
 
     return `
@@ -270,8 +270,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-
-
-
-
 

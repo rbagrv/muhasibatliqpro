@@ -6,8 +6,8 @@ export function getHTML() {
     return `
         <div class="page-content">
             <div class="page-header">
-                <h1>Xüsusi Hesabatlar</h1>
-                <p>Biznesinizə uyğun xüsusi hesabatlar və analitik görünüşlər.</p>
+                <h1 class="page-title">Xüsusi Hesabatlar</h1>
+                <p class="page-subtitle">Biznesinizə uyğun xüsusi hesabatlar və analitik görünüşlər.</p>
                 <button class="btn btn-primary" onclick="app.handleEntityOp('custom-reports', 'create')">
                     <i class="fas fa-plus"></i> Yeni Hesabat
                 </button>
@@ -51,7 +51,7 @@ export function getHTML() {
             </div>
 
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="customReportsTable">
                     <thead>
                         <tr>
                             <th>Hesabat Adı</th>
@@ -142,7 +142,7 @@ export function getFormHTML(action = 'create', data = {}) {
     const isView = action === 'view';
     const isEdit = action === 'edit';
     const title = action === 'create' ? 'Yeni Xüsusi Hesabat' : action === 'edit' ? 'Xüsusi Hesabatı Redaktə Et' : 'Xüsusi Hesabat Məlumatları';
-    
+
     const newId = action === 'create' ? 'CRPT-' + String(Date.now()).slice(-4) : data.id;
 
     return `
@@ -225,6 +225,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-
-
 

@@ -15,7 +15,7 @@ export function getHTML() {
                         <i class="fas fa-upload"></i>
                         İmport
                     </button>
-                    <button class="btn btn-primary" onclick="app.navigateToForm('purchase-offers', 'create')">
+                    <button class="btn btn-primary" onclick="app.handleEntityOp('purchase-offers', 'create')">
                         <i class="fas fa-plus"></i>
                         Yeni Təklif
                     </button>
@@ -99,10 +99,10 @@ export function getHTML() {
                             <td><span class="status-badge pending">Gözləyir</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-offers', 'view', 'PO-2024-001')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'view', 'PO-2024-001')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-offers', 'edit', 'PO-2024-001')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'edit', 'PO-2024-001')">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'approve', 'PO-2024-001')">
@@ -126,7 +126,7 @@ export function getHTML() {
                             <td><span class="status-badge completed">Təsdiqlənib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-offers', 'view', 'PO-2024-002')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'view', 'PO-2024-002')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'convert', 'PO-2024-002')">
@@ -150,7 +150,7 @@ export function getHTML() {
                             <td><span class="status-badge inactive">Rədd edilib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-offers', 'view', 'PO-2024-003')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'view', 'PO-2024-003')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'archive', 'PO-2024-003')">
@@ -171,7 +171,7 @@ export function getHTML() {
                             <td><span class="status-badge pending">Müzakirə</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('purchase-offers', 'view', 'PO-2024-004')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'view', 'PO-2024-004')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('purchase-offers', 'negotiate', 'PO-2024-004')">

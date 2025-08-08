@@ -17,7 +17,7 @@ export function getHTML() {
                     </button>
                 </div>
             </div>
-            
+
             <div class="module-content">
                 <div class="api-overview-cards">
                     <div class="api-card">
@@ -45,52 +45,62 @@ export function getHTML() {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="api-card">
                         <div class="card-header">
                             <h3>API Açarları</h3>
                         </div>
                         <div class="card-content">
-                            <div class="api-keys">
-                                <div class="api-key">
-                                    <div class="key-info">
-                                        <span>Production</span>
-                                        <code>pk_live_*****</code>
-                                    </div>
-                                    <button class="btn btn-ghost btn-sm">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <div class="api-key">
-                                    <div class="key-info">
-                                        <span>Test</span>
-                                        <code>pk_test_*****</code>
-                                    </div>
-                                    <button class="btn btn-ghost btn-sm">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
+                            <div class="data-table-container">
+                                <table class="data-table" id="apiKeysTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Ad</th>
+                                            <th>Açar</th>
+                                            <th>Əməliyyatlar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="api-key">
+                                            <td class="key-info"><span>Production</span></td>
+                                            <td><code>pk_live_*****</code></td>
+                                            <td><button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button></td>
+                                        </tr>
+                                        <tr class="api-key">
+                                            <td class="key-info"><span>Test</span></td>
+                                            <td><code>pk_test_*****</code></td>
+                                            <td><button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="api-card">
                         <div class="card-header">
                             <h3>Webhooks</h3>
                         </div>
                         <div class="card-content">
-                            <div class="webhook-urls">
-                                <div class="webhook-url">
-                                    <div class="url-info">
-                                        <span>Əsas URL</span>
-                                        <code>https://api.muhasibatliqpro.az/webhook</code>
-                                    </div>
-                                    <span class="status-badge active">Aktiv</span>
-                                </div>
+                            <div class="data-table-container">
+                                <table class="data-table" id="webhooksTable">
+                                    <thead>
+                                        <tr>
+                                            <th>URL</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="webhook-url">
+                                            <td><code>https://api.muhasibatliqpro.az/webhook</code></td>
+                                            <td><span class="status-badge active">Aktiv</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="api-card">
                         <div class="card-header">
                             <h3>Rate Limiting</h3>
@@ -109,32 +119,43 @@ export function getHTML() {
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="api-docs-section">
                     <div class="card-header">
                         <h3>API Endpoints</h3>
                     </div>
-                    <div class="api-endpoints">
-                        <div class="endpoint">
-                            <div class="method get">GET</div>
-                            <code>/api/v2/products</code>
-                            <span>Məhsullar siyahısı</span>
-                        </div>
-                        <div class="endpoint">
-                            <div class="method post">POST</div>
-                            <code>/api/v2/sales</code>
-                            <span>Yeni satış</span>
-                        </div>
-                        <div class="endpoint">
-                            <div class="method put">PUT</div>
-                            <code>/api/v2/customers/{id}</code>
-                            <span>Müştəri redaktəsi</span>
-                        </div>
-                        <div class="endpoint">
-                            <div class="method delete">DELETE</div>
-                            <code>/api/v2/products/{id}</code>
-                            <span>Məhsul silinməsi</span>
-                        </div>
+                    <div class="data-table-container">
+                        <table class="data-table" id="apiEndpointsTable">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Endpoint</th>
+                                    <th>Təsvir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="endpoint">
+                                    <td><div class="method get">GET</div></td>
+                                    <td><code>/api/v2/products</code></td>
+                                    <td>Məhsullar siyahısı</td>
+                                </tr>
+                                <tr class="endpoint">
+                                    <td><div class="method post">POST</div></td>
+                                    <td><code>/api/v2/sales</code></td>
+                                    <td>Yeni satış</td>
+                                </tr>
+                                <tr class="endpoint">
+                                    <td><div class="method put">PUT</div></td>
+                                    <td><code>/api/v2/customers/{id}</code></td>
+                                    <td>Müştəri redaktəsi</td>
+                                </tr>
+                                <tr class="endpoint">
+                                    <td><div class="method delete">DELETE</div></td>
+                                    <td><code>/api/v2/products/{id}</code></td>
+                                    <td>Məhsul silinməsi</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -22,7 +22,7 @@ export function getHTML() {
                 </button>
             </div>
         </div>
-        
+
         <div class="pos-main">
             <div class="pos-left-panel">
                 <div class="pos-categories">
@@ -32,7 +32,7 @@ export function getHTML() {
                     <button class="pos-category">Geyim</button>
                     <button class="pos-category">Digər</button>
                 </div>
-                
+
                 <div class="pos-products-grid">
                     <div class="pos-product" onclick="app.addToCart('prod1')">
                         <div class="pos-product-img">📱</div>
@@ -42,7 +42,7 @@ export function getHTML() {
                             <div class="pos-product-stock">Stok: 15</div>
                         </div>
                     </div>
-                    
+
                     <div class="pos-product" onclick="app.addToCart('prod2')">
                         <div class="pos-product-img">🖱️</div>
                         <div class="pos-product-info">
@@ -53,7 +53,7 @@ export function getHTML() {
                     </div>
                 </div>
             </div>
-            
+
             <div class="pos-right-panel">
                 <div class="pos-cart-header">
                     <h3>Cari Satış</h3>
@@ -62,14 +62,14 @@ export function getHTML() {
                         Təmizlə
                     </button>
                 </div>
-                
+
                 <div class="pos-cart-items" id="posCartItems">
                     <div class="pos-empty-cart">
                         <i class="fas fa-shopping-cart"></i>
                         <p>Səbət boşdur</p>
                     </div>
                 </div>
-                
+
                 <div class="pos-cart-summary">
                     <div class="summary-row">
                         <span>Məhsul sayı:</span>
@@ -88,7 +88,7 @@ export function getHTML() {
                         <span id="posTotal">₼0.00</span>
                     </div>
                 </div>
-                
+
                 <div class="pos-actions">
                     <button class="btn btn-lg btn-secondary" onclick="app.holdSale()">
                         <i class="fas fa-pause"></i>
@@ -104,5 +104,4 @@ export function getHTML() {
     </div>
     `;
 }
-
 

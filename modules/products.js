@@ -8,7 +8,7 @@ export function getHTML() {
             <div class="page-header">
                 <h1>Məhsullar</h1>
                 <p>Anbarda olan məhsullar və onların əsas məlumatları.</p>
-                <button class="btn btn-primary" onclick="app.navigateToForm('products', 'create')">
+                <button class="btn btn-primary" onclick="app.handleEntityOp('products', 'create')">
                     <i class="fas fa-plus"></i> Yeni Məhsul
                 </button>
             </div>
@@ -71,8 +71,8 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'view', 'prod1')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'edit', 'prod1')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'view', 'prod1')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'edit', 'prod1')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-ghost btn-sm"><i class="fas fa-chart-line"></i></button>
                                 </div>
                             </td>
@@ -86,8 +86,8 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'view', 'prod2')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'edit', 'prod2')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'view', 'prod2')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'edit', 'prod2')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-ghost btn-sm"><i class="fas fa-chart-line"></i></button>
                                 </div>
                             </td>
@@ -101,8 +101,8 @@ export function getHTML() {
                             <td><span class="status-badge warning">Az Stok</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'view', 'prod3')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('products', 'edit', 'prod3')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'view', 'prod3')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('products', 'edit', 'prod3')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-ghost btn-sm"><i class="fas fa-plus"></i></button>
                                 </div>
                             </td>
@@ -257,4 +257,3 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-

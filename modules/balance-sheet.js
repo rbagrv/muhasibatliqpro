@@ -8,8 +8,8 @@ export function getHTML() {
             <div class="page-header">
                 <h1>Balans Hesabatı</h1>
                 <p>Aktivlər, öhdəliklər və kapital üzrə balans hesabatı.</p>
-                <button class="btn btn-primary" onclick="app.handleEntityOp('financial-reports', 'create')">
-                    <i class="fas fa-plus"></i> Yeni Maliyyə Hesabatı
+                <button class="btn btn-primary" onclick="app.handleEntityOp('balance-sheet', 'create')">
+                    <i class="fas fa-plus"></i> Yeni Balans Hesabatı
                 </button>
             </div>
 
@@ -288,6 +288,3 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-
-
-

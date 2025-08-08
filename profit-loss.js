@@ -51,7 +51,7 @@ export function getHTML() {
             </div>
 
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="profitLossStatementTable">
                     <thead>
                         <tr>
                             <th>Hesab</th>
@@ -150,7 +150,7 @@ export function getFormHTML(action = 'create', data = {}) {
     const isView = action === 'view';
     const isEdit = action === 'edit';
     const title = action === 'create' ? 'Yeni Mənfəət və Zərər Hesabatı' : action === 'edit' ? 'Mənfəət və Zərər Hesabatını Redaktə Et' : 'Mənfəət və Zərər Hesabatı Məlumatları';
-    
+
     const newId = action === 'create' ? 'PL-RPT-' + String(Date.now()).slice(-4) : data.id;
 
     return `

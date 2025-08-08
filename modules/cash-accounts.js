@@ -66,7 +66,7 @@ export function getHTML() {
             </div>
             
             <div class="data-table-container">
-                <table class="data-table">
+                <table class="data-table" id="cashAccountsTable">
                     <thead>
                         <tr>
                             <th>Ad</th>

@@ -66,5 +66,52 @@ export function getFormHTML(action = 'create', data = {}) {
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Əsas Məlumatlar</h3>
-                        <div class="
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Hesab Nömrəsi *</label>
+                                <input type="text" name="accountNumber" class="form-input" value="${data.accountNumber || ''}" required ${isView ? 'readonly' : ''}>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Hesab Adı *</label>
+                                <input type="text" name="accountName" class="form-input" value="${data.accountName || ''}" required ${isView ? 'readonly' : ''}>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tip</label>
+                                <select name="type" class="form-input" ${isView ? 'disabled' : ''}>
+                                    <option value="">Seçin...</option>
+                                    <option value="asset" ${data.type === 'asset' ? 'selected' : ''}>Aktiv</option>
+                                    <option value="liability" ${data.type === 'liability' ? 'selected' : ''}>Öhdəlik</option>
+                                    <option value="equity" ${data.type === 'equity' ? 'selected' : ''}>Kapital</option>
+                                    <option value="revenue" ${data.type === 'revenue' ? 'selected' : ''}>Gəlir</option>
+                                    <option value="expense" ${data.type === 'expense' ? 'selected' : ''}>Xərc</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-input" ${isView ? 'disabled' : ''}>
+                                    <option value="active" ${data.status === 'active' ? 'selected' : ''}>Aktiv</option>
+                                    <option value="inactive" ${data.status === 'inactive' ? 'selected' : ''}>Qeyri-aktiv</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Təsvir</label>
+                                <textarea name="description" class="form-textarea" ${isView ? 'readonly' : ''}>${data.description || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    ${!isView ? `
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="app.navigateTo('correspondence-accounts')">
+                                <i class="fas fa-times"></i> Ləğv et
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> ${action === 'create' ? 'Yarat' : 'Yadda Saxla'}
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </form>
+        </div>
+    `;
+}
 

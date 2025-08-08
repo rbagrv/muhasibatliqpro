@@ -225,63 +225,119 @@ export function getHTML() {
             </div>
 
             <div class="dashboard-grid">
-                <div class="directory-card">
+                <div class="dashboard-item-card">
                     <div class="card-header">
                         <h3>Son Aktivlər</h3>
                     </div>
                     <div class="card-content">
-                        <ul class="simple-list">
-                            <li><i class="fas fa-shopping-cart"></i> SINV-2024-005: ₼2,891.00</li>
-                            <li><i class="fas fa-receipt"></i> PINV-2024-002: ₼12,800.00</li>
-                            <li><i class="fas fa-file-invoice-dollar"></i> SO-2024-006: ₼15,500.00</li>
-                            <li><i class="fas fa-exchange-alt"></i> TRF-2024-001: ₼1,000.00</li>
+                        <ul class="item-list">
+                            <li class="item-list-entry">
+                                <div class="item-icon success"><i class="fas fa-shopping-cart"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Satış Fakturası</span>
+                                    <span class="item-id">SINV-2024-005</span>
+                                </div>
+                                <span class="item-value">₼2,891.00</span>
+                            </li>
+                            <li class="item-list-entry">
+                                <div class="item-icon info"><i class="fas fa-receipt"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Alış Fakturası</span>
+                                    <span class="item-id">PINV-2024-002</span>
+                                </div>
+                                <span class="item-value">₼12,800.00</span>
+                            </li>
+                            <li class="item-list-entry">
+                                <div class="item-icon primary"><i class="fas fa-file-invoice-dollar"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Satış Təklifi</span>
+                                    <span class="item-id">SO-2024-006</span>
+                                </div>
+                                <span class="item-value">₼15,500.00</span>
+                            </li>
+                            <li class="item-list-entry">
+                                <div class="item-icon warning"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Pul Köçürməsi</span>
+                                    <span class="item-id">TRF-2024-001</span>
+                                </div>
+                                <span class="item-value">₼1,000.00</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
-                <div class="directory-card">
+                <div class="dashboard-info-card">
                     <div class="card-header">
                         <h3>Sistem Analitikası</h3>
                     </div>
                     <div class="card-content">
-                        <div class="api-stats">
-                            <div class="api-stat-item">
-                                <span class="api-stat-label">API Status</span>
-                                <span class="api-stat-value text-success">Aktiv</span>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">API Status</span>
+                                <span class="info-value text-success">Aktiv</span>
                             </div>
-                            <div class="api-stat-item">
-                                <span class="api-stat-label">WebSocket</span>
-                                <span class="api-stat-value text-success">Aktiv</span>
+                            <div class="info-item">
+                                <span class="info-label">WebSocket</span>
+                                <span class="info-value text-success">Aktiv</span>
                             </div>
-                            <div class="api-stat-item">
-                                <span class="api-stat-label">Database</span>
-                                <span class="api-stat-value text-success">Aktiv</span>
+                            <div class="info-item">
+                                <span class="info-label">Database</span>
+                                <span class="info-value text-success">Aktiv</span>
                             </div>
-                            <div class="api-stat-item">
-                                <span class="api-stat-label">Yüklənmə vaxtı</span>
-                                <span class="api-stat-value">~200ms</span>
+                            <div class="info-item">
+                                <span class="info-label">Yüklənmə vaxtı</span>
+                                <span class="info-value">~200ms</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="directory-card">
+                <div class="dashboard-item-card">
                     <div class="card-header">
                         <h3>Ödənilməmiş Fakturalar</h3>
                     </div>
                     <div class="card-content">
-                        <ul class="simple-list">
-                            <li><i class="fas fa-exclamation-triangle text-danger"></i> SINV-2024-006: ₼796.50 (vaxtı keçib)</li>
-                            <li><i class="fas fa-clock text-warning"></i> SINV-2024-004: ₼1,003.00 (gözləyir)</li>
+                        <ul class="item-list">
+                            <li class="item-list-entry">
+                                <div class="item-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Vaxtı Keçib</span>
+                                    <span class="item-id">SINV-2024-006</span>
+                                </div>
+                                <span class="item-value">₼796.50</span>
+                            </li>
+                            <li class="item-list-entry">
+                                <div class="item-icon warning"><i class="fas fa-clock"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Gözləyən</span>
+                                    <span class="item-id">SINV-2024-004</span>
+                                </div>
+                                <span class="item-value">₼1,003.00</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
-                <div class="directory-card">
+                <div class="dashboard-item-card">
                     <div class="card-header">
                         <h3>Son Jurnal Qeydləri</h3>
                     </div>
                     <div class="card-content">
-                        <ul class="simple-list">
-                            <li><i class="fas fa-book"></i> JE-2024-001: Kassa mədaxil - satış</li>
-                            <li><i class="fas fa-book"></i> JE-2024-002: Bank köçürməsi</li>
+                        <ul class="item-list">
+                            <li class="item-list-entry">
+                                <div class="item-icon info"><i class="fas fa-book"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Kassa mədaxil - satış</span>
+                                    <span class="item-id">JE-2024-001</span>
+                                </div>
+                                <span class="item-value"></span>
+                            </li>
+                            <li class="item-list-entry">
+                                <div class="item-icon info"><i class="fas fa-book"></i></div>
+                                <div class="item-text">
+                                    <span class="item-title">Bank köçürməsi</span>
+                                    <span class="item-id">JE-2024-002</span>
+                                </div>
+                                <span class="item-value"></span>
+                            </li>
                         </ul>
                     </div>
                 </div>

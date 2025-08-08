@@ -8,8 +8,8 @@ export function getHTML() {
             <div class="page-header">
                 <h1>Mənfəət və Zərər Hesabatı</h1>
                 <p>Müəyyən dövr üzrə gəlir və xərclərin təhlili.</p>
-                <button class="btn btn-primary" onclick="app.handleEntityOp('financial-reports', 'create')">
-                    <i class="fas fa-plus"></i> Yeni Maliyyə Hesabatı
+                <button class="btn btn-primary" onclick="app.handleEntityOp('profit-loss', 'create')">
+                    <i class="fas fa-plus"></i> Yeni P&L Hesabatı
                 </button>
             </div>
 
@@ -145,4 +145,3 @@ export function getHTML() {
         </div>
     `;
 }
-

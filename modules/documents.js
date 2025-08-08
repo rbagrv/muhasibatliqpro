@@ -13,7 +13,7 @@ export function getHTML() {
             </button>
         </div>
         <div class="data-table-container">
-            <table class="data-table">
+            <table class="data-table" id="documentsTable">
                 <thead>
                     <tr>
                         <th>Ad</th>
@@ -72,7 +72,7 @@ export function getFormHTML(action = 'create', data = {}) {
     const isView = action === 'view';
     const isEdit = action === 'edit';
     const title = action === 'create' ? 'Yeni Sənəd' : action === 'edit' ? 'Sənədi Redaktə Et' : 'Sənəd Məlumatları';
-    
+
     const newId = action === 'create' ? 'DOC-' + String(Date.now()).slice(-4) : data.id;
 
     return `
@@ -149,6 +149,4 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-
-
 

@@ -13,7 +13,7 @@ export function getHTML() {
                         <i class="fas fa-upload"></i>
                         İmport
                     </button>
-                    <button class="btn btn-primary" onclick="app.navigateToForm('journal-entries', 'create')">
+                    <button class="btn btn-primary" onclick="app.handleEntityOp('journal-entries', 'create')">
                         <i class="fas fa-plus"></i>
                         Yeni Yazılış
                     </button>
@@ -92,7 +92,7 @@ export function getHTML() {
                             <td><span class="status-badge completed">Təsdiqlənib</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('journal-entries', 'view', 'JE-2024-001')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'view', 'JE-2024-001')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'print', 'JE-2024-001')">
@@ -115,10 +115,10 @@ export function getHTML() {
                             <td><span class="status-badge pending">Gözləyir</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('journal-entries', 'view', 'JE-2024-002')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'view', 'JE-2024-002')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('journal-entries', 'edit', 'JE-2024-002')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'edit', 'JE-2024-002')">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'approve', 'JE-2024-002')">
@@ -138,10 +138,10 @@ export function getHTML() {
                             <td><span class="status-badge warning">Xəta</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('journal-entries', 'view', 'JE-2024-003')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'view', 'JE-2024-003')">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('journal-entries', 'edit', 'JE-2024-003')">
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'edit', 'JE-2024-003')">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('journal-entries', 'fix', 'JE-2024-003')">

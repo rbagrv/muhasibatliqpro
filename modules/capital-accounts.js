@@ -8,12 +8,12 @@ export function getHTML() {
         <div class="page-header">
             <h1>Kapital Hesabları</h1>
             <p>Şirkətin kapitalının uçotu və dəyişməsi.</p>
-            <button class="btn btn-primary" onclick="app.navigateToForm('capital-accounts', 'create')">
+            <button class="btn btn-primary" onclick="app.handleEntityOp('capital-accounts', 'create')">
                 <i class="fas fa-plus"></i> Yeni Kapital Əlavəsi
             </button>
         </div>
         <div class="data-table-container">
-            <table class="data-table">
+            <table class="data-table" id="capitalAccountsTable">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -31,8 +31,8 @@ export function getHTML() {
                         <td><span class="status-badge completed">Tam ödənilib</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('capital-accounts', 'view', 'CAPITAL-0001')"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('capital-accounts', 'edit', 'CAPITAL-0001')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('capital-accounts', 'view', 'CAPITAL-0001')"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('capital-accounts', 'edit', 'CAPITAL-0001')"><i class="fas fa-edit"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -47,7 +47,7 @@ export function getFormHTML(action = 'create', data = {}) {
     const isView = action === 'view';
     const isEdit = action === 'edit';
     const title = action === 'create' ? 'Yeni Kapital Əməliyyatı' : action === 'edit' ? 'Kapital Əməliyyatını Redaktə Et' : 'Kapital Əməliyyatı Məlumatları';
-    
+
     const newId = action === 'create' ? 'CAPITAL-' + String(Date.now()).slice(-4) : data.id;
 
     return `
@@ -129,4 +129,3 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-

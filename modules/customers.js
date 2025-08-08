@@ -8,7 +8,7 @@ export function getHTML() {
             <div class="page-header">
                 <h1>Müştərilər</h1>
                 <p>Müştəri məlumatları, satış tarixçəsi və əlaqə idarəetməsi.</p>
-                <button class="btn btn-primary" onclick="app.navigateToForm('customers', 'create')">
+                <button class="btn btn-primary" onclick="app.handleEntityOp('customers', 'create')">
                     <i class="fas fa-plus"></i> Yeni Müştəri
                 </button>
             </div>
@@ -33,8 +33,8 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'view', 'cust1')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'edit', 'cust1')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('customers', 'view', 'cust1')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('customers', 'edit', 'cust1')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -46,8 +46,8 @@ export function getHTML() {
                             <td><span class="status-badge active">Aktiv</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'view', 'cust2')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-ghost btn-sm" onclick="app.navigateToForm('customers', 'edit', 'cust2')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('customers', 'view', 'cust2')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-ghost btn-sm" onclick="app.handleEntityOp('customers', 'edit', 'cust2')"><i class="fas fa-edit"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -265,6 +265,3 @@ export function getFormHTML(action = 'create', data = {}) {
         </div>
     `;
 }
-
-
-
